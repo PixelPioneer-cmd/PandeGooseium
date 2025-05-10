@@ -1,0 +1,54 @@
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(2deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+@keyframes flicker {
+  0% { opacity: 0.4; }
+  25% { opacity: 0.5; }
+  50% { opacity: 0.6; }
+  75% { opacity: 0.5; }
+  100% { opacity: 0.4; }
+}
+
+@keyframes move {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 0.7; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+  100% { transform: scale(1); opacity: 0.7; }
+}
+
+.floatingGoose {
+  animation: float 3s ease-in-out infinite;
+}
+
+.gooseSquare {
+  animation: pulse 2.5s ease-in-out infinite;
+}
+
+.flame {
+  animation: flicker 2s ease-in-out infinite;
+}
+
+.moveAnimation {
+  animation: move 0.5s ease-in-out;
+}
+
+.hotSquare {
+  position: relative;
+  overflow: hidden;
+}
+
+.hotSquare::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at center, rgba(255, 100, 50, 0.2) 0%, transparent 70%);
+  z-index: 5;
+}

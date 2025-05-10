@@ -1,0 +1,187 @@
+import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
+import styles from './Board.module.css';
+
+type BoardProps = { position: number; remotePosition?: number };
+
+interface SpecialSquareTypes {
+  [key: string]: number[];
+}
+
+export default function Board({ position, remotePosition }: BoardProps) {
+  const squares = Array.from({ length: 40 }, (_, i) => i + 1);
+  
+  // Cases spéciales du jeu de l'oie
+  const specialSquares: SpecialSquareTypes = {
+    oie: [5, 9, 14, 18, 23, 27, 32, 36], // Cases oies
+    pont: [6],                           // Case pont
+    hotel: [19],                         // Case hôtel
+    puits: [31],                         // Case puits
+    labyrinthe: [42],                    // Case labyrinthe
+    prison: [52],                        // Case prison
+    mort: [58]                           // Case mort
+  };
+  
+  // État pour suivre la case qui vient d'être activée
+  const [lastActiveSquare, setLastActiveSquare] = useState<number | null>(null);
+  
+  // Couleurs des joueurs uniformisées - Jaune pour le joueur local, bleu pour les adversaires
+  const localPlayerColor = 'text-yellow-400 border-yellow-400 drop-shadow-glow-yellow';
+  const remotePlayerColor = 'text-blue-400 border-blue-400 drop-shadow-glow-cyan';
+  
+  // Effet pour détecter les changements de position et animer la case
+  useEffect(() => {
+    setLastActiveSquare(position);
+    const timer = setTimeout(() => {
+      setLastActiveSquare(null);
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, [position]);
+  
+  // Fonction pour déterminer le type de case spéciale
+  const getSquareType = (num: number): string | null => {
+    if (specialSquares.oie.includes(num)) return 'oie';
+    if (specialSquares.pont.includes(num)) return 'pont';
+    if (specialSquares.hotel.includes(num)) return 'hotel';
+    if (specialSquares.puits.includes(num)) return 'puits';
+    if (specialSquares.labyrinthe.includes(num)) return 'labyrinthe';
+    if (specialSquares.prison.includes(num)) return 'prison';
+    if (specialSquares.mort.includes(num)) return 'mort';
+    return null;
+  };
+  
+  // Fonction pour obtenir la classe CSS en fonction du type de case
+  const getSquareClass = (num: number): string => {
+    const type = getSquareType(num);
+    switch (type) {
+      case 'oie':
+        return 'bg-green-700/80 border-green-300 border-2';
+      case 'pont':
+        return 'bg-blue-700/60 border-blue-300';
+      case 'hotel':
+        return 'bg-purple-700/60 border-purple-300';
+      case 'puits':
+        return 'bg-indigo-700/60 border-indigo-300';
+      case 'labyrinthe':
+        return 'bg-orange-700/60 border-orange-300';
+      case 'prison':
+        return 'bg-gray-700/60 border-gray-300';
+      case 'mort':
+        return 'bg-black border-white';
+      default:
+        return num <= 9 ? 'bg-red-900/60' : num <= 29 ? 'bg-red-700/60' : 'bg-red-500/60';
+    }
+  };
+  
+  return (
+    <div className="grid grid-cols-4 sm:grid-cols-8 gap-1 sm:gap-2 p-2 sm:p-4 bg-black/20 backdrop-blur-sm rounded-lg">
+      {squares.map((num) => {
+        const squareType = getSquareType(num);
+        
+        return (
+          <div
+            key={num}
+            className={`
+              relative flex items-center justify-center w-8 h-8 sm:w-12 sm:h-12 border rounded 
+              ${getSquareClass(num)}
+              ${position === num ? `ring-2 ${localPlayerColor.split(' ')[1]}` : ''}
+              ${remotePosition === num ? `ring-2 ${remotePlayerColor.split(' ')[1]}` : ''}
+              ${lastActiveSquare === num ? styles.moveAnimation : ''}
+              ${position === num || remotePosition === num ? styles.hotSquare : ''}
+              overflow-hidden transition-all duration-300
+            `}
+          >
+            {/* Effet de flamme sur toutes les cases */}
+            <div className={`absolute inset-0 z-0 opacity-40 ${styles.flame}`}>
+              <Image 
+                src="/assets/flame.svg" 
+                alt="flame" 
+                width={50} 
+                height={50} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            
+            {/* Icônes pour les cases spéciales */}
+            {squareType && (
+              <div className="absolute inset-0 flex items-center justify-center z-5 opacity-70">
+                <div className="w-6 h-6 sm:w-8 sm:h-8">
+                  {squareType === 'oie' && (
+                    <Image 
+                      src="/assets/goose.svg" 
+                      alt="Case oie" 
+                      width={30} 
+                      height={30}
+                      className={`w-full h-full object-contain ${styles.gooseSquare}`}
+                      style={{ filter: "drop-shadow(0 0 8px rgba(103, 232, 249, 0.8))" }}
+                    />
+                  )}
+                  {squareType === 'pont' && (
+                    <span className="text-blue-200 text-xs">🌉</span>
+                  )}
+                  {squareType === 'hotel' && (
+                    <span className="text-purple-200 text-xs">🏨</span>
+                  )}
+                  {squareType === 'puits' && (
+                    <span className="text-indigo-200 text-xs">⛲</span>
+                  )}
+                  {squareType === 'labyrinthe' && (
+                    <span className="text-orange-200 text-xs">🧩</span>
+                  )}
+                  {squareType === 'prison' && (
+                    <span className="text-gray-200 text-xs">🔒</span>
+                  )}
+                  {squareType === 'mort' && (
+                    <span className="text-white text-xs">💀</span>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Numéro de la case */}
+            <span className="text-xs sm:text-sm font-bold text-white z-10">{num}</span>
+            
+            {/* Pion local (oie jaune) */}
+            {position === num && (
+              <div className="absolute inset-0 flex items-center justify-center z-30 -mt-2 transform scale-90">
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 overflow-visible transition-all duration-500 filter drop-shadow-glow-yellow ${styles.floatingGoose}`}>
+                  <div className="relative w-full h-full">
+                    <Image 
+                      src="/assets/goose.svg" 
+                      alt="Votre pion" 
+                      width={40} 
+                      height={40}
+                      className="w-full h-full object-contain"
+                      style={{ filter: "drop-shadow(0 0 8px rgba(255, 224, 102, 0.9))" }}
+                    />
+                    <div className="absolute inset-0 bg-yellow-400 opacity-40 mix-blend-overlay rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Pion distant (oie bleue/cyan) */}
+            {remotePosition === num && (
+              <div className="absolute inset-0 flex items-center justify-center z-20 mt-2 transform scale-80">
+                <div className={`w-8 h-8 sm:w-10 sm:h-10 overflow-visible transition-all duration-500 filter drop-shadow-glow-cyan ${styles.floatingGoose}`}>
+                  <div className="relative w-full h-full">
+                    <Image 
+                      src="/assets/goose.svg" 
+                      alt="Pion adversaire" 
+                      width={40} 
+                      height={40}
+                      className="w-full h-full object-contain"
+                      style={{ filter: "drop-shadow(0 0 8px rgba(59, 130, 246, 0.9)) hue-rotate(180deg)" }}
+                    />
+                    <div className="absolute inset-0 bg-blue-400 opacity-40 mix-blend-overlay rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}

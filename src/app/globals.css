@@ -1,0 +1,115 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+:root {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: radial-gradient(circle at center, #2b0000, #000000);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+  background-size: 200% 200%;
+  animation: flameBG 6s infinite alternate;
+}
+
+@keyframes flameBG {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes glow {
+  0% { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
+  50% { text-shadow: 0 0 20px #ff6600, 0 0 30px #ff6600; }
+  100% { text-shadow: 0 0 10px #ff0000, 0 0 20px #ff0000; }
+}
+
+.glow-text {
+  animation: glow 2s infinite ease-in-out;
+  color: #ff4500;
+}
+
+/* Nouveaux effets pour les flammes et les oies */
+@keyframes float {
+  0% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(1deg); }
+  100% { transform: translateY(0px) rotate(0deg); }
+}
+
+.filter {
+  &.drop-shadow-glow-yellow {
+    filter: drop-shadow(0 0 5px rgba(255, 224, 102, 0.7));
+  }
+  
+  &.drop-shadow-glow-cyan {
+    filter: drop-shadow(0 0 5px rgba(103, 232, 249, 0.7));
+  }
+}
+
+/* Classes utilitaires pour les effets de lueur */
+.text-glow-yellow {
+  text-shadow: 0 0 8px rgba(255, 224, 102, 0.9);
+}
+
+.text-glow-cyan {
+  text-shadow: 0 0 8px rgba(103, 232, 249, 0.9);
+}
+
+/* Animation pour les pions */
+.transform-float {
+  animation: float 2s ease-in-out infinite;
+}
+
+/* Effet de flammes sur les cases */
+@keyframes flameScale {
+  0% { transform: scale(1.0); opacity: 0.6; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1.0); opacity: 0.6; }
+}
+
+.flame-effect {
+  animation: flameScale 2.5s ease-in-out infinite;
+}
+
+/* Effet de brouillard pour l'ambiance infernale */
+@keyframes fogMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.fog-effect {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, rgba(40, 10, 10, 0.1) 0%, rgba(200, 30, 10, 0.05) 25%, rgba(40, 0, 0, 0.1) 50%, rgba(180, 10, 10, 0.05) 75%, rgba(40, 0, 0, 0.1) 100%);
+  background-size: 400% 400%;
+  animation: fogMove 20s ease infinite;
+  pointer-events: none;
+  z-index: 10;
+}

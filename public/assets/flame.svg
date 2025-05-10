@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100px" height="100px" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="flameGradient" cx="50%" cy="50%" r="65%" fx="50%" fy="50%">
+      <stop offset="0%" stop-color="#ffcc00" stop-opacity="0.9"/>
+      <stop offset="45%" stop-color="#ff6600" stop-opacity="0.8"/>
+      <stop offset="85%" stop-color="#ff3300" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#ff0000" stop-opacity="0.3"/>
+    </radialGradient>
+  </defs>
+  <g>
+    <!-- Base de la flamme -->
+    <path d="M50,90 C25,80 15,60 20,40 C23,25 30,15 36,5 C38,20 45,25 50,20 C55,25 62,20 64,5 C70,15 77,25 80,40 C85,60 75,80 50,90 Z" fill="url(#flameGradient)">
+      <animate attributeName="d" dur="2s" repeatCount="indefinite" 
+        values="
+          M50,90 C25,80 15,60 20,40 C23,25 30,15 36,5 C38,20 45,25 50,20 C55,25 62,20 64,5 C70,15 77,25 80,40 C85,60 75,80 50,90 Z;
+          M50,90 C30,85 20,65 22,45 C25,30 35,20 38,8 C36,15 42,30 50,25 C58,30 64,15 62,8 C65,20 75,30 78,45 C80,65 70,85 50,90 Z;
+          M50,90 C25,80 15,60 20,40 C23,25 30,15 36,5 C38,20 45,25 50,20 C55,25 62,20 64,5 C70,15 77,25 80,40 C85,60 75,80 50,90 Z"
+        calcMode="spline"
+        keySplines="0.5 0 0.5 1; 0.5 0 0.5 1"
+      />
+    </path>
+  </g>
+</svg>
