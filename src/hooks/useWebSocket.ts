@@ -87,29 +87,26 @@ export function useWebSocket(
   const handleWebSocketMessage = useCallback((event: MessageEvent) => {
     try {
       const msg = JSON.parse(event.data);
-      
+
       switch (msg.type) {
         case 'game_state': {
           const players = msg.players as Player[];
-          
-          // Identifier notre joueur pour obtenir notre ID et infos
+          // Mettre à jour directement la liste des joueurs avec leurs couleurs serveur
+          setConnectedPlayers(players);
+
+          // Mettre à jour notre joueur local
           const myPlayer = players.find(p => p.name === localName);
           if (myPlayer) {
             myIdRef.current = myPlayer.id;
             setLocalPlayer(myPlayer);
           }
-          
-          // Mettre à jour la liste complète des joueurs
-          setConnectedPlayers(players);
-          
-          // Mettre à jour l'ID du joueur dont c'est le tour
-          setCurrentTurnPlayerId(msg.currentTurnPlayerId);
-          
-          // Déterminer si c'est notre tour
+
+          // Mettre à jour l'ID du joueur dont c'est le tour et le flag
+          setCurrentTurnPlayerId(msg.currentTurnPlayerId as string);
           setIsMyTurn(msg.currentTurnPlayerId === myIdRef.current);
           break;
         }
-        
+
         case 'error': {
           setFeedback(msg.message);
           // Demander une mise à jour de l'état du jeu
@@ -141,7 +138,7 @@ export function useWebSocket(
     } catch (e) {
       console.error("Erreur lors du traitement du message WebSocket:", e);
     }
-  }, [localName, sendMessage, chatMessages]);
+  }, [localName, sendMessage]);
 
   useEffect(() => {
     if (!isMulti) return;
