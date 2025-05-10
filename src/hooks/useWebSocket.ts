@@ -12,6 +12,14 @@ interface WebSocketMessage {
   [key: string]: unknown;
 }
 
+interface ChatMessage {
+  playerId: string;
+  name: string;
+  message: string;
+  color?: string; // Couleur du joueur (optionnelle)
+  timestamp?: number; // Timestamp pour identifier les messages
+}
+
 interface UseWebSocketReturn {
   connectedPlayers: Player[];
   localPlayer: Player | null;
@@ -20,6 +28,8 @@ interface UseWebSocketReturn {
   sendMessage: (message: WebSocketMessage) => void;
   feedback: string;
   setFeedback: (message: string) => void;
+  chatMessages: ChatMessage[];
+  sendChat: (messageText: string) => void;
 }
 
 /**
@@ -35,9 +45,16 @@ export function useWebSocket(
   const [currentTurnPlayerId, setCurrentTurnPlayerId] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string>('');
   const [localPlayer, setLocalPlayer] = useState<Player | null>(null);
-  
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
+
   const wsRef = useRef<WebSocket | null>(null);
   const myIdRef = useRef<string | null>(null);
+
+  // Pour filtrer les messages de chat en doublon
+  const processedChatTimestamps = useRef<Set<number>>(new Set());
+
+  // URL du serveur WebSocket, défini via .env
+  const WS_SERVER = process.env.NEXT_PUBLIC_WS_SERVER || 'ws://localhost:4000';
 
   // Fonction pour envoyer des messages au serveur WebSocket
   const sendMessage = useCallback((message: WebSocketMessage) => {
@@ -46,46 +63,91 @@ export function useWebSocket(
     }
   }, []);
 
+  const sendChat = useCallback((messageText: string) => {
+    if (!localName || !myIdRef.current) return;
+    
+    console.log("Envoi d'un message chat:", messageText);
+    
+    // Générer un timestamp pour identifier ce message de façon unique
+    const msgTimestamp = Date.now();
+    
+    // Ne pas inclure la couleur dans le message client
+    // On laisse le serveur gérer la couleur pour garantir la cohérence
+    sendMessage({ 
+      type: 'chat', 
+      message: messageText,
+      name: localName,
+      timestamp: msgTimestamp
+    });
+    
+    // On n'ajoute plus de message localement pour éviter les doublons
+  }, [localName, sendMessage]);
+
   // Gestionnaire de messages du serveur WebSocket
   const handleWebSocketMessage = useCallback((event: MessageEvent) => {
-    const msg = JSON.parse(event.data);
-    
-    if (msg.type === 'game_state') {
-      const players = msg.players as Player[];
+    try {
+      const msg = JSON.parse(event.data);
       
-      // Log pour le débogage
-      console.log('Message game_state reçu:', players);
-      
-      // Identifier notre joueur pour obtenir notre ID et infos
-      const myPlayer = players.find(p => p.name === localName);
-      if (myPlayer) {
-        console.log('Mon joueur trouvé:', myPlayer);
-        myIdRef.current = myPlayer.id;
-        setLocalPlayer(myPlayer);
-      } else {
-        console.log('Joueur local non trouvé dans la liste:', localName);
+      switch (msg.type) {
+        case 'game_state': {
+          const players = msg.players as Player[];
+          
+          // Identifier notre joueur pour obtenir notre ID et infos
+          const myPlayer = players.find(p => p.name === localName);
+          if (myPlayer) {
+            myIdRef.current = myPlayer.id;
+            setLocalPlayer(myPlayer);
+          }
+          
+          // Mettre à jour la liste complète des joueurs
+          setConnectedPlayers(players);
+          
+          // Mettre à jour l'ID du joueur dont c'est le tour
+          setCurrentTurnPlayerId(msg.currentTurnPlayerId);
+          
+          // Déterminer si c'est notre tour
+          setIsMyTurn(msg.currentTurnPlayerId === myIdRef.current);
+          break;
+        }
+        
+        case 'error': {
+          setFeedback(msg.message);
+          // Demander une mise à jour de l'état du jeu
+          sendMessage({ type: 'get_game_state' });
+          break;
+        }
+        
+        case 'chat': {
+          const ts = msg.timestamp as number;
+          if (!ts) break;
+          // Filtrer les doublons
+          if (processedChatTimestamps.current.has(ts)) break;
+          processedChatTimestamps.current.add(ts);
+
+          // Ajouter le message
+          setChatMessages(prev => [...prev, { 
+            playerId: msg.playerId as string,
+            name: msg.name as string,
+            message: msg.message as string,
+            color: msg.color as string | undefined,
+            timestamp: ts
+          }]);
+          break;
+        }
+        
+        default:
+          console.log("Type de message non reconnu:", msg.type);
       }
-      
-      // Mettre à jour la liste complète des joueurs
-      setConnectedPlayers(players);
-      
-      // Mettre à jour l'ID du joueur dont c'est le tour
-      setCurrentTurnPlayerId(msg.currentTurnPlayerId);
-      
-      // Déterminer si c'est notre tour
-      setIsMyTurn(msg.currentTurnPlayerId === myIdRef.current);
-    } else if (msg.type === 'error') {
-      setFeedback(msg.message);
-      // Demander une mise à jour de l'état du jeu
-      sendMessage({ type: 'get_game_state' });
+    } catch (e) {
+      console.error("Erreur lors du traitement du message WebSocket:", e);
     }
-  }, [localName, sendMessage]);
+  }, [localName, sendMessage, chatMessages]);
 
   useEffect(() => {
     if (!isMulti) return;
 
     // Créer une nouvelle connexion WebSocket
-    const ws = new WebSocket('ws://localhost:4000');
+    const ws = new WebSocket(WS_SERVER);
     
     ws.onopen = () => {
       // Joindre la partie avec notre nom et position
@@ -105,7 +167,7 @@ export function useWebSocket(
       // Tenter une reconnexion après un court délai
       setTimeout(() => {
         if (isMulti && localName) {
-          const newWs = new WebSocket('ws://localhost:4000');
+          const newWs = new WebSocket(WS_SERVER);
           newWs.onopen = () => {
             newWs.send(JSON.stringify({ 
               type: 'join', 
@@ -126,7 +188,7 @@ export function useWebSocket(
         ws.close();
       }
     };
-  }, [isMulti, localName, initialPosition, handleWebSocketMessage]);
+  }, [isMulti, localName, initialPosition, handleWebSocketMessage, WS_SERVER]);
 
   // Effet pour initialiser le joueur local en mode solo
   useEffect(() => {
@@ -145,6 +207,8 @@ export function useWebSocket(
     currentTurnPlayerId,
     sendMessage,
     feedback,
-    setFeedback
+    setFeedback,
+    chatMessages,
+    sendChat
   };
 }

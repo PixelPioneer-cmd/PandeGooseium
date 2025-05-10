@@ -6,6 +6,7 @@ import PlayerList from './components/PlayerList';
 import QuestionModal from './components/QuestionModal';
 import { useWebSocket, Player } from '../hooks/useWebSocket';
 import { useGameLogic } from '../hooks/useGameLogic';
+import Chat from './components/Chat';
 
 export default function Home() {
   // État pour le mode de jeu
@@ -21,7 +22,9 @@ export default function Home() {
     currentTurnPlayerId,
     sendMessage,
     feedback,
-    setFeedback
+    setFeedback,
+    chatMessages, 
+    sendChat
   } = useWebSocket(isMulti, localName, 1);
   
   // Log pour le débogage
@@ -105,16 +108,24 @@ export default function Home() {
           {position === 40 && <p className="mt-4 text-2xl text-green-400">Vous avez gagné ! 🎉</p>}
         </div>
         
-        {/* Liste des joueurs connectés (sur le côté en desktop, en bas en mobile) */}
+        {/* Liste des joueurs et chat (sur le côté en desktop, en bas en mobile) */}
         {isMulti && (
-          <PlayerList
-            localName={localName}
-            isMyTurn={isMyTurn}
-            connectedPlayers={connectedPlayers}
-            currentTurnPlayerId={currentTurnPlayerId}
-            currentOpponent={currentOpponent}
-            setCurrentOpponent={setCurrentOpponent}
-          />
+          <div className="lg:w-1/4 flex flex-col gap-4">
+            <PlayerList
+              localName={localName}
+              isMyTurn={isMyTurn}
+              connectedPlayers={connectedPlayers}
+              currentTurnPlayerId={currentTurnPlayerId}
+              currentOpponent={currentOpponent}
+              setCurrentOpponent={setCurrentOpponent}
+            />
+            <Chat 
+              chatMessages={chatMessages} 
+              sendChat={sendChat} 
+              connectedPlayers={connectedPlayers}
+              localName={localName}
+            />
+          </div>
         )}
       </div>
 

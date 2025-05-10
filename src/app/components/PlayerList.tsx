@@ -21,32 +21,30 @@ export default function PlayerList({
   currentOpponent,
   setCurrentOpponent
 }: PlayerListProps) {
-  // Logs de débogage
-  console.log('PlayerList - localName:', localName);
-  console.log('PlayerList - connectedPlayers:', connectedPlayers);
-  console.log('PlayerList - joueur local trouvé:', connectedPlayers.find(p => p.name === localName));
+  // Récupérer le joueur local
+  const localPlayer = connectedPlayers.find(p => p.name === localName);
   
   return (
-    <div className="lg:w-1/4 p-3 bg-gray-800/80 rounded-lg h-fit lg:h-auto lg:max-h-screen overflow-y-auto shadow-lg border border-gray-700">
+    <div className="p-3 bg-gray-800/80 rounded-lg h-fit max-h-screen overflow-y-auto shadow-lg border border-gray-700">
       <h2 className="text-lg font-bold mb-2 text-center lg:text-left">Joueurs connectés:</h2>
       
       <div className="flex flex-wrap lg:flex-col gap-2">
         {/* Joueur local - utilise la couleur attribuée par le serveur */}
-        {connectedPlayers.find(p => p.name === localName) ? (
+        {localPlayer ? (
           <div 
             className={`p-2 m-1 rounded-md w-full border-2`}
             style={{
               backgroundColor: isMyTurn 
-                ? `${connectedPlayers.find(p => p.name === localName)?.color || "#FFD700"}22` 
+                ? `${localPlayer.color}22` 
                 : 'rgba(55, 65, 81, 0.8)', // bg-gray-700/80
-              borderColor: connectedPlayers.find(p => p.name === localName)?.color || "#FFD700"
+              borderColor: localPlayer.color
             }}
           >
             <span 
               className="font-bold"
               style={{ 
-                color: connectedPlayers.find(p => p.name === localName)?.color || "#FFD700",
-                textShadow: `0 0 10px ${connectedPlayers.find(p => p.name === localName)?.color || "#FFD700"}`
+                color: localPlayer.color,
+                textShadow: `0 0 10px ${localPlayer.color}`
               }}
             >
               {localName}
@@ -80,19 +78,19 @@ export default function PlayerList({
             className={`p-2 m-1 border-2 rounded-md cursor-pointer w-full`}
             style={{
               backgroundColor: currentTurnPlayerId === player.id 
-                ? `${player.color || "#3B82F6"}22` 
+                ? `${player.color}22` 
                 : currentOpponent?.id === player.id 
-                  ? `${player.color || "#3B82F6"}15`
+                  ? `${player.color}15`
                   : 'rgba(55, 65, 81, 0.8)', // bg-gray-700/80
-              borderColor: player.color || "#3B82F6"
+              borderColor: player.color
             }}
             onClick={() => setCurrentOpponent(player)}
           >
             <span 
               className="font-bold"
               style={{ 
-                color: player.color || "#3B82F6",
-                textShadow: `0 0 10px ${player.color || "#3B82F6"}`
+                color: player.color,
+                textShadow: `0 0 10px ${player.color}`
               }}
             >
               {player.name}
