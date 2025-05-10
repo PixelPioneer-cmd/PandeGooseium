@@ -20,6 +20,45 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Configuration des variables d'environnement
+
+Copiez le fichier d'exemple et ajustez les variables selon votre environnement :
+
+```bash
+cp .env.example .env.local
+# puis ouvrez .env.local pour modifier NEXT_PUBLIC_WS_SERVER si nécessaire
+```
+
+## Lancement du projet en développement
+
+Installez les dépendances :
+
+```bash
+npm install
+```
+
+Démarrez simultanément le serveur Next.js et le serveur WebSocket :
+
+```bash
+npm run dev:all
+```
+
+Si vous préférez lancer séparément :
+
+```bash
+npm run dev    # Next.js
+npm run ws     # WebSocket
+```
+
+## Lancement en production
+
+Dans un environnement de production (ou sur Vercel), définissez la variable `NEXT_PUBLIC_WS_SERVER` dans vos settings et lancez :
+
+```bash
+npm run build
+npm run start
+```
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:
