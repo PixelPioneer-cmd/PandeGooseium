@@ -258,23 +258,18 @@ function createWSServer(port: number): WebSocketServer {
             })
           );
         } else if (message.type === "chat") {
-          // Broadcast message de chat à tous les clients
-          if (shouldLog) console.log("Message chat reçu:", message.message);
-
-          // Toujours utiliser la couleur du joueur stockée dans le serveur
+          // Gestion du chat: on récupère la couleur serveur et on envoie un seul message à tous les clients
+          if (shouldLog) console.log("Chat reçu de", message.name, message.message);
           const player = connectedPlayers.get(extendedWs.id);
           if (!player) return;
-
-          const timestamp = message.timestamp as number || Date.now();
           const chatPayload = JSON.stringify({
             type: 'chat',
             playerId: extendedWs.id,
             name: player.name,
             message: message.message,
             color: player.color,
-            timestamp
+            timestamp: Date.now()
           });
-
           // Envoyer une seule fois à tous les clients
           wss.clients.forEach(client => {
             if (client.readyState === WebSocket.OPEN) {
