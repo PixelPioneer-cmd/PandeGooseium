@@ -130,7 +130,34 @@ function createWSServer(port: number): WebSocketServer {
   function handleJoinMessage(ws: WebSocket & { id: string }, message: WebSocketMessage): void {
     if (!message.name) return;
     
-    // Attribuer une couleur au joueur
+    // Vérifier si un joueur avec ce nom existe déjà
+    const existingPlayer = Array.from(connectedPlayers.values()).find(
+      p => p.name === message.name
+    );
+    
+    if (existingPlayer) {
+      // Si le joueur existe déjà mais avec un autre ID, c'est probablement une reconnexion
+      // Nous allons mettre à jour l'ID et garder les autres infos
+      if (existingPlayer.id !== ws.id) {
+        if (shouldLog) console.log(`Joueur ${message.name} reconnecté avec nouvel ID ${ws.id}`);
+        // Récupérer l'ancienne couleur
+        const existingColor = usedColors.get(existingPlayer.id);
+        // Supprimer l'ancienne entrée
+        connectedPlayers.delete(existingPlayer.id);
+        usedColors.delete(existingPlayer.id);
+        
+        // Réutiliser la même couleur pour ce joueur
+        if (existingColor) {
+          usedColors.set(ws.id, existingColor);
+        }
+      } else {
+        // Même joueur, même ID - ne rien faire
+        if (shouldLog) console.log(`Joueur ${message.name} déjà connecté avec ID ${ws.id}`);
+        return;
+      }
+    }
+    
+    // Attribuer une couleur au joueur (ou réutiliser l'existante)
     const playerColor = assignPlayerColor(ws.id);
     
     // Ajouter le joueur à la liste
@@ -221,8 +248,7 @@ function createWSServer(port: number): WebSocketServer {
         if (message.type === "join") {
           handleJoinMessage(extendedWs, message);
         } else if (message.type === "move") {
-          handleMoveMessage(extendedWs, message);
-        } else if (message.type === "get_game_state") {
+          handleMoveMessage(extendedWs, message);        } else if (message.type === "get_game_state") {
           // Demande explicite d'état de jeu
           extendedWs.send(
             JSON.stringify({
@@ -231,6 +257,25 @@ function createWSServer(port: number): WebSocketServer {
               currentTurnPlayerId,
             })
           );
+        } else if (message.type === "chat") {
+          // Gestion du chat: on récupère la couleur serveur et on envoie un seul message à tous les clients
+          if (shouldLog) console.log("Chat reçu de", message.name, message.message);
+          const player = connectedPlayers.get(extendedWs.id);
+          if (!player) return;
+          const chatPayload = JSON.stringify({
+            type: 'chat',
+            playerId: extendedWs.id,
+            name: player.name,
+            message: message.message,
+            color: player.color,
+            timestamp: Date.now()
+          });
+          // Envoyer une seule fois à tous les clients
+          wss.clients.forEach(client => {
+            if (client.readyState === WebSocket.OPEN) {
+              client.send(chatPayload);
+            }
+          });
         }
       } catch (e) {
         if (shouldLog) console.error("Erreur de parsing JSON:", e);
@@ -256,9 +301,9 @@ function createWSServer(port: number): WebSocketServer {
     });
   });
 
-  server.listen(port, () => {
+  server.listen(port, "0.0.0.0", () => {
     if (shouldLog) {
-      console.log(`WebSocket server listening on ws://localhost:${port}`);
+      console.log(`WebSocket server listening on port ${port}, accessible from other machines`);
     }
   });
 
