@@ -4,6 +4,7 @@ services:
     name: pandegooseium
     env: node
     plan: free
+    branch: fix/render-deployment
     buildCommand: npm install --legacy-peer-deps && npm run build
     startCommand: npm run start
     healthCheckPath: /
