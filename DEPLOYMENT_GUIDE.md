@@ -147,4 +147,3 @@ NEXT_PUBLIC_WS_SERVER=https://pandegooseium.onrender.com
 4. **Update environment variables** on Render platform if needed
 
 The migration is complete and ready for production deployment! 🚀
-# Test GPG commit
