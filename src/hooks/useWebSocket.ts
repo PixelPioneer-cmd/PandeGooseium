@@ -162,15 +162,21 @@ export function useWebSocket(
       // Mettre à jour notre joueur local
       const myPlayer = players.find(p => p.name === localName);
       if (myPlayer) {
+        console.log('🤵 Joueur local trouvé dans game_state:', myPlayer);
         myIdRef.current = myPlayer.id;
         setLocalPlayer(myPlayer);
-        console.log('🤵 Joueur local mis à jour:', myPlayer);
+        console.log('🤵 Joueur local mis à jour via game_state:', myPlayer);
+      } else {
+        console.log('⚠️ Joueur local non trouvé dans game_state, nom cherché:', localName);
       }
 
       // Mettre à jour l'ID du joueur dont c'est le tour et le flag
       setCurrentTurnPlayerId(parsed.currentTurnPlayerId);
-      setIsMyTurn(parsed.currentTurnPlayerId === myIdRef.current);
-      console.log('🎲 Tour actuel:', parsed.currentTurnPlayerId, 'Mon tour:', parsed.currentTurnPlayerId === myIdRef.current);
+      
+      // Utiliser soit myIdRef.current (si défini) soit myPlayer.id pour déterminer le tour
+      const myCurrentId = myIdRef.current || myPlayer?.id;
+      setIsMyTurn(parsed.currentTurnPlayerId === myCurrentId);
+      console.log('🎲 Tour actuel:', parsed.currentTurnPlayerId, 'Mon ID:', myCurrentId, 'Mon tour:', parsed.currentTurnPlayerId === myCurrentId);
     });
     
     // Écouter la confirmation de join
