@@ -115,8 +115,15 @@ export function useWebSocket(
 
   useEffect(() => {
     if (!isMulti) return;
+    
+    // Ne pas se connecter si on n'a pas de nom
+    if (!localName || localName.trim() === '') {
+      console.log('⏳ Pas de localName, attente...');
+      return;
+    }
 
     console.log('Tentative de connexion à:', WS_SERVER);
+    console.log('🏷️ Connexion avec localName:', `"${localName}"`);
     
     // Créer une nouvelle connexion Socket.IO avec configuration robuste pour Render
     const socket = io(WS_SERVER, {
@@ -132,13 +139,17 @@ export function useWebSocket(
     socket.on('connect', () => {
       console.log('Socket.IO connecté, ID:', socket.id);
       console.log('Transport utilisé:', socket.io.engine.transport.name);
+      console.log('🏷️ Avant envoi join - localName:', `"${localName}"`);
+      console.log('🏷️ Avant envoi join - initialPosition:', initialPosition);
       
       // Joindre la partie avec notre nom et position
-      socket.emit('join', { 
+      const joinData = { 
         type: 'join', 
         name: localName, 
         position: initialPosition 
-      });
+      };
+      console.log('📤 Données join envoyées:', joinData);
+      socket.emit('join', joinData);
     });
     
     socket.on('connect_error', (error) => {
