@@ -54,8 +54,29 @@ export function useWebSocket(
   // Pour filtrer les messages de chat en doublon
   const processedChatTimestamps = useRef<Set<number>>(new Set());
 
-  // URL du serveur WebSocket, défini via .env
-  const WS_SERVER = process.env.NEXT_PUBLIC_WS_SERVER || 'http://localhost:4000';
+  // URL du serveur WebSocket - configuration intelligente selon l'environnement
+  const getWebSocketURL = () => {
+    // Si une URL explicite est fournie via .env, l'utiliser
+    if (process.env.NEXT_PUBLIC_WS_SERVER) {
+      return process.env.NEXT_PUBLIC_WS_SERVER;
+    }
+    
+    // En production, utiliser la même URL que l'application web
+    if (typeof window !== 'undefined') {
+      const { protocol, hostname } = window.location;
+      
+      // Sur Render, l'app web et le WebSocket partagent le même port
+      if (hostname.includes('onrender.com')) {
+        const wsProtocol = protocol === 'https:' ? 'https:' : 'http:';
+        return `${wsProtocol}//${hostname}`;
+      }
+    }
+    
+    // Fallback pour le développement local
+    return 'http://localhost:4000';
+  };
+
+  const WS_SERVER = getWebSocketURL();
 
   // Fonction pour envoyer des messages au serveur WebSocket
   const sendMessage = useCallback((message: WebSocketMessage) => {
@@ -84,21 +105,10 @@ export function useWebSocket(
   useEffect(() => {
     if (!isMulti) return;
 
-    // URL du serveur - détecter automatiquement le protocole correct
-    let serverUrl = WS_SERVER;
-    
-    // En production, s'assurer d'utiliser le bon protocole
-    if (typeof window !== 'undefined') {
-      const isProduction = window.location.protocol === 'https:';
-      if (isProduction && serverUrl.startsWith('http://')) {
-        serverUrl = serverUrl.replace('http://', 'https://');
-      }
-    }
-    
-    console.log('Tentative de connexion à:', serverUrl);
+    console.log('Tentative de connexion à:', WS_SERVER);
     
     // Créer une nouvelle connexion Socket.IO avec configuration robuste pour Render
-    const socket = io(serverUrl, {
+    const socket = io(WS_SERVER, {
       transports: ['websocket', 'polling'], // WebSocket d'abord, polling en fallback
       upgrade: true,                        // Permettre l'upgrade vers WebSocket
       reconnectionAttempts: 10,             // Plus de tentatives pour les réseaux instables
