@@ -1,5 +1,6 @@
 import http from 'http';
-import { WebSocketServer, WebSocket } from 'ws';
+import express from 'express';
+import { Server as SocketIOServer, Socket } from 'socket.io';
 
 interface Player {
   id: string;
@@ -20,10 +21,21 @@ interface WebSocketMessage {
  * @param port Port sur lequel le serveur doit écouter
  * @returns Instance WebSocketServer
  */
-function createWSServer(port: number): WebSocketServer {
-  const shouldLog = process.env.NODE_ENV !== "test";
-  const server = http.createServer();
-  const wss = new WebSocketServer({ server });
+function createWSServer(port: number): SocketIOServer {
+  const shouldLog = process.env.NODE_ENV !== 'test';
+  const app = express();
+  const server = http.createServer(app);
+  
+  // Configuration CORS plus complète pour Render
+  const io = new SocketIOServer(server, { 
+    cors: { 
+      origin: "*",
+      methods: ["GET", "POST"],
+      credentials: true
+    },
+    transports: ['websocket', 'polling'], // Support des deux transports
+    allowEIO3: true // Compatibilité avec les anciennes versions
+  });
 
   // Liste des joueurs connectés
   const connectedPlayers = new Map<string, Player>();
@@ -85,11 +97,7 @@ function createWSServer(port: number): WebSocketServer {
       currentTurnPlayerId,
     });
 
-    wss.clients.forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(message);
-      }
-    });
+    io.emit('game_state', message);
   }
 
   /**
@@ -127,7 +135,7 @@ function createWSServer(port: number): WebSocketServer {
   /**
    * Gère les messages de type 'join'
    */
-  function handleJoinMessage(ws: WebSocket & { id: string }, message: WebSocketMessage): void {
+  function handleJoinMessage(socket: Socket, message: WebSocketMessage): void {
     if (!message.name) return;
     
     // Vérifier si un joueur avec ce nom existe déjà
@@ -138,8 +146,8 @@ function createWSServer(port: number): WebSocketServer {
     if (existingPlayer) {
       // Si le joueur existe déjà mais avec un autre ID, c'est probablement une reconnexion
       // Nous allons mettre à jour l'ID et garder les autres infos
-      if (existingPlayer.id !== ws.id) {
-        if (shouldLog) console.log(`Joueur ${message.name} reconnecté avec nouvel ID ${ws.id}`);
+      if (existingPlayer.id !== socket.id) {
+        if (shouldLog) console.log(`Joueur ${message.name} reconnecté avec nouvel ID ${socket.id}`);
         // Récupérer l'ancienne couleur
         const existingColor = usedColors.get(existingPlayer.id);
         // Supprimer l'ancienne entrée
@@ -148,36 +156,32 @@ function createWSServer(port: number): WebSocketServer {
         
         // Réutiliser la même couleur pour ce joueur
         if (existingColor) {
-          usedColors.set(ws.id, existingColor);
+          usedColors.set(socket.id, existingColor);
         }
       } else {
         // Même joueur, même ID - ne rien faire
-        if (shouldLog) console.log(`Joueur ${message.name} déjà connecté avec ID ${ws.id}`);
+        if (shouldLog) console.log('Joueur', message.name, 'déjà connecté avec ID', socket.id);
         return;
       }
     }
     
     // Attribuer une couleur au joueur (ou réutiliser l'existante)
-    const playerColor = assignPlayerColor(ws.id);
+    const playerColor = assignPlayerColor(socket.id);
     
     // Ajouter le joueur à la liste
-    connectedPlayers.set(ws.id, {
-      id: ws.id,
+    connectedPlayers.set(socket.id, {
+      id: socket.id,
       name: message.name,
       position: message.position || 1,
       color: playerColor
     });
 
     // Répondre aux autres clients avec le message de join
-    wss.clients.forEach(client => {
-      if (client !== ws && client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({ type: "join", name: message.name }));
-      }
-    });
+    socket.broadcast.emit('join', { name: message.name });
 
     // Si c'est le premier joueur, lui donner le tour
     if (connectedPlayers.size === 1 && currentTurnPlayerId === null) {
-      currentTurnPlayerId = ws.id;
+      currentTurnPlayerId = socket.id;
     }
 
     // Diffuser la liste mise à jour des joueurs et l'état du jeu
@@ -187,26 +191,21 @@ function createWSServer(port: number): WebSocketServer {
   /**
    * Gère les messages de type 'move'
    */
-  function handleMoveMessage(ws: WebSocket & { id: string }, message: WebSocketMessage): void {
+  function handleMoveMessage(socket: Socket, message: WebSocketMessage): void {
     if (!message.position || message.position === undefined) return;
     
     // Vérifier que c'est bien le tour de ce joueur
-    if (ws.id === currentTurnPlayerId) {
+    if (socket.id === currentTurnPlayerId) {
       // Mettre à jour la position du joueur
-      const player = connectedPlayers.get(ws.id);
+      const player = connectedPlayers.get(socket.id);
       if (player) {
         player.position = message.position;
-        connectedPlayers.set(ws.id, player);
+        connectedPlayers.set(socket.id, player);
 
         // Diffuser le move aux autres clients
-        wss.clients.forEach(client => {
-          if (client !== ws && client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({ 
-              type: "move", 
-              position: message.position,
-              playerId: ws.id
-            }));
-          }
+        socket.broadcast.emit('move', { 
+          position: message.position,
+          playerId: socket.id
         });
 
         // Passer au joueur suivant
@@ -221,96 +220,66 @@ function createWSServer(port: number): WebSocketServer {
       }
 
       // Informer le client que ce n'est pas son tour
-      ws.send(
-        JSON.stringify({
-          type: "error",
-          message: "Ce n'est pas votre tour",
-          currentTurnPlayerId,
-        })
-      );
+      socket.emit('error', {
+        message: "Ce n'est pas votre tour",
+        currentTurnPlayerId,
+      });
     }
   }
 
-  wss.on("connection", (ws: WebSocket) => {
-    if (shouldLog) console.log("Client connecté");
+  io.on('connection', (socket: Socket) => {
+    if (shouldLog) console.log('Client connecté', socket.id);
 
-    // Étendre l'objet WebSocket avec un ID
-    const extendedWs = ws as WebSocket & { id: string };
-    
-    // Assigner un ID temporaire au client
-    extendedWs.id = Date.now().toString();
+    // Utiliser socket.id comme identifiant unique
 
-    extendedWs.on("message", (data) => {
-      try {
-        const message = JSON.parse(data.toString()) as WebSocketMessage;
-
-        // Gérer les différents types de messages
-        if (message.type === "join") {
-          handleJoinMessage(extendedWs, message);
-        } else if (message.type === "move") {
-          handleMoveMessage(extendedWs, message);        } else if (message.type === "get_game_state") {
-          // Demande explicite d'état de jeu
-          extendedWs.send(
-            JSON.stringify({
-              type: "game_state",
-              players: Array.from(connectedPlayers.values()),
-              currentTurnPlayerId,
-            })
-          );
-        } else if (message.type === "chat") {
-          // Gestion du chat: on récupère la couleur serveur et on envoie un seul message à tous les clients
-          if (shouldLog) console.log("Chat reçu de", message.name, message.message);
-          const player = connectedPlayers.get(extendedWs.id);
-          if (!player) return;
-          const chatPayload = JSON.stringify({
-            type: 'chat',
-            playerId: extendedWs.id,
-            name: player.name,
-            message: message.message,
-            color: player.color,
-            timestamp: Date.now()
-          });
-          // Envoyer une seule fois à tous les clients
-          wss.clients.forEach(client => {
-            if (client.readyState === WebSocket.OPEN) {
-              client.send(chatPayload);
-            }
-          });
-        }
-      } catch (e) {
-        if (shouldLog) console.error("Erreur de parsing JSON:", e);
-      }
+    // Gérer les events Socket.IO
+    socket.on('join', (message: WebSocketMessage) => handleJoinMessage(socket, message));
+    socket.on('move', (message: WebSocketMessage) => handleMoveMessage(socket, message));
+    socket.on('get_game_state', () => {
+      socket.emit('game_state', {
+        players: Array.from(connectedPlayers.values()),
+        currentTurnPlayerId,
+      });
+    });
+    socket.on('chat', (msg: WebSocketMessage) => {
+      if (shouldLog) console.log('Chat reçu de', msg.name, msg.message);
+      const player = connectedPlayers.get(socket.id);
+      if (!player) return;
+      const payload = {
+        type: 'chat',
+        playerId: socket.id,
+        name: player.name,
+        message: msg.message as string,
+        color: player.color,
+        timestamp: Date.now(),
+      };
+      io.emit('chat', payload);
     });
 
-    extendedWs.on("close", () => {
-      // Vérifier si c'était le tour de ce joueur
-      const wasThisTurn = currentTurnPlayerId === extendedWs.id;
-
-      // Supprimer le joueur de la liste
-      connectedPlayers.delete(extendedWs.id);
-
-      // Si c'était le tour de ce joueur, passer au joueur suivant
+    socket.on('disconnect', () => {
+      const wasThisTurn = currentTurnPlayerId === socket.id;
+      connectedPlayers.delete(socket.id);
       if (wasThisTurn) {
         setNextPlayerTurn();
       } else {
-        // Sinon, juste mettre à jour la liste des joueurs
         broadcastGameState();
       }
-
-      if (shouldLog) console.log("Client déconnecté");
+      if (shouldLog) console.log('Client déconnecté', socket.id);
     });
   });
 
-  server.listen(port, "0.0.0.0", () => {
-    if (shouldLog) {
-      console.log(`WebSocket server listening on port ${port}, accessible from other machines`);
-    }
+  server.listen(port, '0.0.0.0', () => {
+    if (shouldLog) console.log(`Socket.IO server listening on port ${port} (${process.env.NODE_ENV || 'development'})`);
   });
-
-  return wss;
+  return io;
 }
 
-const PORT = 4000;
-createWSServer(PORT);
+// Utiliser le port fourni par Render ou un port par défaut
+const PORT = parseInt(process.env.PORT || '4000', 10);
+
+// Ne créer le serveur que si ce fichier est exécuté directement
+if (import.meta.url === `file://${process.argv[1]}`) {
+  createWSServer(PORT);
+}
 
 export default createWSServer;

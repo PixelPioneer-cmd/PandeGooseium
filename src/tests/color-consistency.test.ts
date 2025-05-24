@@ -1,33 +1,31 @@
-import WebSocket, { WebSocketServer } from 'ws';
+import { Server as SocketIOServer } from 'socket.io';
+import { io } from 'socket.io-client';
 import createWSServer from '../../ws-server';
 
-// Mock pour éviter l'erreur de réassignation de NODE_ENV
-jest.mock('process', () => ({
-  ...process,
-  env: {
-    ...process.env,
-    NODE_ENV: 'test'
-  }
-}));
+// Augmenter le timeout pour tous les tests dans ce fichier
+jest.setTimeout(30000);
 
 // Port unique pour éviter les conflits avec d'autres tests
-const PORT = 5002;
+const PORT = 5006;
 
 describe('Cohérence des couleurs entre joueurs', () => {
-  let wss: WebSocketServer;
+  let ioServer: SocketIOServer;
 
   beforeAll(() => {
-    wss = createWSServer(PORT);
+    ioServer = createWSServer(PORT);
   });
 
   afterAll((done) => {
-    wss.close(() => done());
+    ioServer.close(() => {
+      console.log('Server closed');
+      done();
+    });
   });
 
   test('Chaque joueur reçoit une couleur unique et cohérente', (done) => {
-    // Créer deux clients
-    const clientA = new WebSocket(`ws://localhost:${PORT}`);
-    const clientB = new WebSocket(`ws://localhost:${PORT}`);
+    // Créer deux clients Socket.IO
+    const clientA = io(`http://localhost:${PORT}`, { transports: ['websocket'] });
+    const clientB = io(`http://localhost:${PORT}`, { transports: ['websocket'] });
     
     // Données du joueur A
     const playerAName = 'Alice';
@@ -52,68 +50,67 @@ describe('Cohérence des couleurs entre joueurs', () => {
         
         // Vérifier la cohérence des couleurs lors d'une reconnexion
         // Créer un nouveau client avec le même nom que A
-        const clientARejoin = new WebSocket(`ws://localhost:${PORT}`);
+        const clientARejoin = io(`http://localhost:${PORT}`, { transports: ['websocket'] });
         
-        clientARejoin.on('open', () => {
-          clientARejoin.send(JSON.stringify({ type: 'join', name: playerAName }));
+        clientARejoin.on('connect', () => {
+          clientARejoin.emit('join', { type: 'join', name: playerAName });
         });
         
-        clientARejoin.on('message', (data) => {
-          const msg = JSON.parse(data.toString());
-          if (msg.type === 'game_state') {
-            // Trouver le joueur correspondant
-            const samePlayer = msg.players.find((p: { name: string }) => p.name === playerAName);
-            
-            // Vérifier que le nouveau joueur a la même couleur que l'ancien
-            expect(samePlayer).toBeTruthy();
-            expect(samePlayer.color).toEqual(playerAColor);
-            
-            // Fermer tous les clients
-            clientA.close();
-            clientB.close();
-            clientARejoin.close();
-            
-            // Test terminé
-            done();
-          }
+        clientARejoin.on('game_state', (data) => {
+          const msg = typeof data === 'string' ? JSON.parse(data) : data;
+          
+          // Trouver le joueur correspondant
+          const samePlayer = msg.players.find((p: { name: string }) => p.name === playerAName);
+          
+          // Vérifier que le nouveau joueur a la même couleur que l'ancien
+          expect(samePlayer).toBeTruthy();
+          expect(samePlayer.color).toEqual(playerAColor);
+          
+          // Fermer tous les clients
+          clientA.disconnect();
+          clientB.disconnect();
+          clientARejoin.disconnect();
+          
+          // Test terminé
+          done();
         });
       }
     }
 
-    // Gestion des messages pour le client A
-    clientA.on('open', () => {
-      clientA.send(JSON.stringify({ type: 'join', name: playerAName }));
+    // Connecter le client A
+    clientA.on('connect', () => {
+      clientA.emit('join', { type: 'join', name: playerAName });
     });
-    
-    clientA.on('message', (data) => {
-      const msg = JSON.parse(data.toString());
-      if (msg.type === 'game_state') {
-        // Trouver le joueur A dans la liste
-        const playerA = msg.players.find((p: { name: string }) => p.name === playerAName);
-        if (playerA) {
-          playerAColor = playerA.color;
-          playerDataReceived++;
-          checkTestComplete();
-        }
+
+    // Connecter le client B
+    clientB.on('connect', () => {
+      clientB.emit('join', { type: 'join', name: playerBName });
+    });
+
+    // Écouter les mises à jour d'état du jeu pour le client A
+    clientA.on('game_state', (data) => {
+      const msg = typeof data === 'string' ? JSON.parse(data) : data;
+      
+      // Trouver le joueur A dans la liste
+      const playerA = msg.players.find((p: { name: string }) => p.name === playerAName);
+      if (playerA) {
+        playerAColor = playerA.color;
+        playerDataReceived++;
+        checkTestComplete();
       }
     });
 
-    // Gestion des messages pour le client B
-    clientB.on('open', () => {
-      clientB.send(JSON.stringify({ type: 'join', name: playerBName }));
-    });
-    
-    clientB.on('message', (data) => {
-      const msg = JSON.parse(data.toString());
-      if (msg.type === 'game_state') {
-        // Trouver le joueur B dans la liste
-        const playerB = msg.players.find((p: { name: string }) => p.name === playerBName);
-        if (playerB) {
-          playerBColor = playerB.color;
-          playerDataReceived++;
-          checkTestComplete();
-        }
+    // Écouter les mises à jour d'état du jeu pour le client B
+    clientB.on('game_state', (data) => {
+      const msg = typeof data === 'string' ? JSON.parse(data) : data;
+      
+      // Trouver le joueur B dans la liste
+      const playerB = msg.players.find((p: { name: string }) => p.name === playerBName);
+      if (playerB) {
+        playerBColor = playerB.color;
+        playerDataReceived++;
+        checkTestComplete();
       }
     });
-  }, 10000); // Timeout plus long pour les tests de WebSocket
+  });
 });
