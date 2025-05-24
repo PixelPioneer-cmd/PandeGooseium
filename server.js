@@ -49,6 +49,14 @@ function broadcastGameState() {
   
   const playersArray = Array.from(connectedPlayers.values());
   
+  console.log('🎮 Diffusion game_state avec joueurs:', playersArray.map(p => ({
+    id: p.id,
+    name: p.name,
+    nameLength: p.name.length,
+    position: p.position,
+    color: p.color
+  })));
+  
   io.emit('game_state', {
     type: 'game_state',
     players: playersArray,
@@ -74,6 +82,13 @@ function setupSocketIO(server) {
       const playerName = data.name;
       const initialPosition = data.position || 0;
       
+      console.log('🔍 Tentative de join avec:', {
+        name: playerName,
+        nameType: typeof playerName,
+        nameLength: playerName ? playerName.length : 'undefined',
+        rawData: data
+      });
+      
       if (!playerName) {
         socket.emit('error', { type: 'error', message: 'Nom de joueur requis' });
         return;
@@ -87,6 +102,14 @@ function setupSocketIO(server) {
       };
 
       connectedPlayers.set(socket.id, newPlayer);
+      
+      console.log('👤 Joueur ajouté:', {
+        id: newPlayer.id,
+        name: `"${newPlayer.name}"`,
+        nameLength: newPlayer.name.length,
+        position: newPlayer.position,
+        color: newPlayer.color
+      });
 
       if (currentTurnPlayerId === null && connectedPlayers.size === 1) {
         currentTurnPlayerId = socket.id;

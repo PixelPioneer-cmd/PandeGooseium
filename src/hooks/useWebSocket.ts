@@ -155,6 +155,8 @@ export function useWebSocket(
       const players = parsed.players as Player[];
       
       console.log('👥 Joueurs mis à jour:', players);
+      console.log('🔍 Recherche du joueur local avec nom:', `"${localName}"`);
+      console.log('🔍 Noms des joueurs disponibles:', players.map(p => `"${p.name}"`));
       
       // Mettre à jour la liste des joueurs
       setConnectedPlayers(players);
@@ -167,7 +169,15 @@ export function useWebSocket(
         setLocalPlayer(myPlayer);
         console.log('🤵 Joueur local mis à jour via game_state:', myPlayer);
       } else {
-        console.log('⚠️ Joueur local non trouvé dans game_state, nom cherché:', localName);
+        console.log('⚠️ Joueur local non trouvé dans game_state, nom cherché:', `"${localName}"`);
+        console.log('⚠️ Noms disponibles côté serveur:', players.map(p => `"${p.name}"`));
+        console.log('⚠️ Comparaison exacte:', players.map(p => ({
+          server: p.name,
+          local: localName,
+          match: p.name === localName,
+          serverLength: p.name.length,
+          localLength: localName.length
+        })));
       }
 
       // Mettre à jour l'ID du joueur dont c'est le tour et le flag
