@@ -7,8 +7,10 @@
     "dev": "next dev --turbopack",
     "ws": "tsx ws-server.ts",
     "dev:all": "concurrently \"npm run dev\" \"npm run ws\"",
+    "dev:integrated": "node server.js",
     "build": "next build",
-    "start": "concurrently \"next start\" \"tsx ws-server.ts\"",
+    "start": "node server.js",
+    "start:legacy": "concurrently \"next start\" \"tsx ws-server.ts\"",
     "start:prod": "tsx ws-server.ts",
     "lint": "next lint",
     "test": "node --no-warnings --experimental-vm-modules node_modules/jest/bin/jest.js"
