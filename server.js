@@ -49,10 +49,10 @@ function broadcastGameState() {
   
   const playersArray = Array.from(connectedPlayers.values());
   
-  io.emit('players', {
-    type: 'players',
+  io.emit('game_state', {
+    type: 'game_state',
     players: playersArray,
-    currentTurn: currentTurnPlayerId
+    currentTurnPlayerId: currentTurnPlayerId
   });
 }
 
@@ -96,7 +96,7 @@ function setupSocketIO(server) {
         type: 'joined',
         playerId: socket.id,
         player: newPlayer,
-        currentTurn: currentTurnPlayerId
+        currentTurnPlayerId: currentTurnPlayerId
       });
 
       broadcastGameState();

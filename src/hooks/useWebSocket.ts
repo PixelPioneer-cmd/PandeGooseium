@@ -158,6 +158,15 @@ export function useWebSocket(
       setIsMyTurn(parsed.currentTurnPlayerId === myIdRef.current);
     });
     
+    // Écouter la confirmation de join
+    socket.on('joined', (data) => {
+      console.log('Rejoint avec succès:', data);
+      myIdRef.current = data.playerId;
+      setLocalPlayer(data.player);
+      setCurrentTurnPlayerId(data.currentTurnPlayerId);
+      setIsMyTurn(data.currentTurnPlayerId === data.playerId);
+    });
+    
     // Écouter les messages d'erreur
     socket.on('error', (msg) => {
       console.error('Erreur du serveur:', msg);
@@ -187,6 +196,12 @@ export function useWebSocket(
     
     socket.on('join', (msg) => {
       console.log('Nouveau joueur rejoint:', msg);
+    });
+    
+    socket.on('player_moved', (msg) => {
+      console.log('Joueur déplacé:', msg);
+      // Actualiser l'état du jeu quand un joueur bouge
+      setFeedback(`${msg.player.name} s'est déplacé à la case ${msg.newPosition}`);
     });
     
     socket.on('move', (msg) => {
