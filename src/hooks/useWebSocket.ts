@@ -92,19 +92,25 @@ export function useWebSocket(
   }, []);
 
   const sendChat = useCallback((messageText: string) => {
-    if (!localName || !myIdRef.current) return;
+    if (!localName) {
+      console.log("⚠️ Pas de nom local défini, impossible d'envoyer le chat");
+      return;
+    }
     
-    console.log("Envoi d'un message chat:", messageText);
+    if (!socketRef.current?.connected) {
+      console.log("⚠️ Socket non connecté, impossible d'envoyer le chat");
+      return;
+    }
+    
+    console.log("📤 Envoi d'un message chat:", messageText, "de", localName);
     
     // Avec Socket.IO, on émet directement l'événement 'chat'
-    if (socketRef.current?.connected) {
-      socketRef.current.emit('chat', { 
-        type: 'chat', 
-        message: messageText,
-        name: localName,
-        timestamp: Date.now()
-      });
-    }
+    socketRef.current.emit('chat', { 
+      type: 'chat', 
+      message: messageText,
+      name: localName,
+      timestamp: Date.now()
+    });
   }, [localName]);
 
   useEffect(() => {
