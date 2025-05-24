@@ -58,21 +58,26 @@ export function useWebSocket(
   const getWebSocketURL = () => {
     // Si une URL explicite est fournie via .env, l'utiliser
     if (process.env.NEXT_PUBLIC_WS_SERVER) {
+      console.log('🔗 URL WebSocket depuis .env:', process.env.NEXT_PUBLIC_WS_SERVER);
       return process.env.NEXT_PUBLIC_WS_SERVER;
     }
     
     // En production, utiliser la même URL que l'application web
     if (typeof window !== 'undefined') {
-      const { protocol, hostname } = window.location;
+      const { protocol, hostname, port } = window.location;
+      console.log('🌍 Détection environnement:', { protocol, hostname, port });
       
       // Sur Render, l'app web et le WebSocket partagent le même port
       if (hostname.includes('onrender.com')) {
         const wsProtocol = protocol === 'https:' ? 'https:' : 'http:';
-        return `${wsProtocol}//${hostname}`;
+        const wsUrl = `${wsProtocol}//${hostname}`;
+        console.log('🚀 URL WebSocket Render:', wsUrl);
+        return wsUrl;
       }
     }
     
     // Fallback pour le développement local
+    console.log('🏠 URL WebSocket local:', 'http://localhost:4000');
     return 'http://localhost:4000';
   };
 
@@ -137,11 +142,13 @@ export function useWebSocket(
     
     // Écouter les messages game_state
     socket.on('game_state', (data) => {
-      console.log('Reçu game_state:', data);
+      console.log('📊 Reçu game_state:', data);
       
       // Le serveur peut envoyer une chaîne JSON ou un objet
       const parsed = typeof data === 'string' ? JSON.parse(data) : data;
       const players = parsed.players as Player[];
+      
+      console.log('👥 Joueurs mis à jour:', players);
       
       // Mettre à jour la liste des joueurs
       setConnectedPlayers(players);
@@ -151,11 +158,13 @@ export function useWebSocket(
       if (myPlayer) {
         myIdRef.current = myPlayer.id;
         setLocalPlayer(myPlayer);
+        console.log('🤵 Joueur local mis à jour:', myPlayer);
       }
 
       // Mettre à jour l'ID du joueur dont c'est le tour et le flag
       setCurrentTurnPlayerId(parsed.currentTurnPlayerId);
       setIsMyTurn(parsed.currentTurnPlayerId === myIdRef.current);
+      console.log('🎲 Tour actuel:', parsed.currentTurnPlayerId, 'Mon tour:', parsed.currentTurnPlayerId === myIdRef.current);
     });
     
     // Écouter la confirmation de join
@@ -176,22 +185,30 @@ export function useWebSocket(
     
     // Écouter les messages de chat
     socket.on('chat', (msg) => {
-      console.log('Message chat reçu:', msg);
+      console.log('💬 Message chat reçu:', msg);
       const ts = msg.timestamp as number;
-      if (!ts) return;
+      if (!ts) {
+        console.log('⚠️ Message chat sans timestamp ignoré');
+        return;
+      }
       
       // Filtrer les doublons
-      if (processedChatTimestamps.current.has(ts)) return;
+      if (processedChatTimestamps.current.has(ts)) {
+        console.log('🔄 Message chat doublon ignoré:', ts);
+        return;
+      }
       processedChatTimestamps.current.add(ts);
 
       // Ajouter le message
-      setChatMessages(prev => [...prev, { 
+      const newMessage = { 
         playerId: msg.playerId,
         name: msg.name,
         message: msg.message,
         color: msg.color,
         timestamp: ts
-      }]);
+      };
+      console.log('✅ Ajout message chat:', newMessage);
+      setChatMessages(prev => [...prev, newMessage]);
     });
     
     socket.on('join', (msg) => {
