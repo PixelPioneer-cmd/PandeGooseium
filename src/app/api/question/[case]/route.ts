@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
-import { levenshtein } from '@/utils/levenshtein';
+import { levenshtein } from '../../../../utils/levenshtein';
 
 async function loadQuestions() {
   const filePath = path.join(process.cwd(), 'data', 'questions.json');
