@@ -1,0 +1,14 @@
+services:
+  # Application Next.js avec serveur WebSocket intégré
+  - type: web
+    name: pandegooseium
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_PUBLIC_WS_SERVER
+        value: https://pandegooseium.onrender.com

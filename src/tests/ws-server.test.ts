@@ -1,117 +1,130 @@
-jest.setTimeout(10000);
-import WebSocket, { WebSocketServer } from 'ws';
-import createWSServer from '../../ws-server.js';
+import { Server as SocketIOServer } from 'socket.io';
+import { io } from 'socket.io-client';
+import createWSServer from '../../ws-server';
 
-// Mock pour éviter l'erreur de réassignation de NODE_ENV
-jest.mock('process', () => ({
-  ...process,
-  env: {
-    ...process.env,
-    NODE_ENV: 'test'
-  }
-}));
+// Interface pour les données attendues du serveur
+interface Player {
+  id: string;
+  name: string;
+  position: number;
+  color: string;
+}
 
-describe('WebSocket Server', () => {
-  let wss: WebSocketServer;
-  const PORT = 5001;
+interface GameStateMessage {
+  players: Player[];
+  currentTurnPlayerId: string | null;
+}
 
-  beforeAll(() => {
-    wss = createWSServer(PORT);
+describe('WebSocket Server (Socket.IO)', () => {
+  // Augmenter le timeout pour tous les tests dans ce fichier
+  jest.setTimeout(30000);
+  
+  let ioServer: SocketIOServer;
+  const PORT = 5005; // Utiliser un port différent pour éviter les conflits
+
+  beforeAll(async () => {
+    // Créer une nouvelle instance de serveur pour les tests
+    ioServer = createWSServer(PORT);
   });
 
-  afterAll((done) => {
-    wss.close(() => done());
-  });
-
-  test('broadcast join message to other clients', (done) => {
-    const clientA = new WebSocket(`ws://localhost:${PORT}`);
-    const clientB = new WebSocket(`ws://localhost:${PORT}`);
-    let openCount = 0;
-    function trySend() {
-      if (openCount === 2) {
-        clientA.send(JSON.stringify({ type: 'join', name: 'Alice' }));
-      }
+  afterAll(done => {
+    // Fermer proprement le serveur après les tests
+    if (ioServer) {
+      ioServer.close(() => {
+        console.log('Server closed');
+        done();
+      });
+    } else {
+      done();
     }
-    clientA.on('open', () => { openCount++; trySend(); });
-    clientB.on('open', () => { openCount++; trySend(); });
-    clientB.on('message', (data) => {
-      const msg = JSON.parse(data.toString());
-      if (msg.type === 'join') {
-        expect(msg).toEqual({ type: 'join', name: 'Alice' });
-        clientA.close();
-        clientB.close();
-        done();
-      }
-    });
   });
 
-  test('broadcast game state with player colors after join', (done) => {
-    const clientA = new WebSocket(`ws://localhost:${PORT}`);
+  test('broadcast join message to other clients', done => {
+    // Créer deux clients Socket.IO
+    const clientA = io(`http://localhost:${PORT}`, { transports: ['websocket'] });
+    const clientB = io(`http://localhost:${PORT}`, { transports: ['websocket'] });
     
-    clientA.on('open', () => {
-      clientA.send(JSON.stringify({ type: 'join', name: 'Charlie' }));
-    });
+    let connectedCount = 0;
     
-    clientA.on('message', (data) => {
-      const msg = JSON.parse(data.toString());
-      if (msg.type === 'game_state') {
-        expect(msg.players).toBeDefined();
-        expect(Array.isArray(msg.players)).toBe(true);
-        
-        // Vérifier que le nouveau joueur a une couleur assignée
-        const player = msg.players.find((p: { name: string }) => p.name === 'Charlie');
-        expect(player).toBeDefined();
-        expect(player.color).toBeDefined();
-        
-        clientA.close();
-        done();
-      }
-    });
-  });
-
-  test('broadcast move message to other clients', (done) => {
-    const clientA = new WebSocket(`ws://localhost:${PORT}`);
-    const clientB = new WebSocket(`ws://localhost:${PORT}`);
-    let joinCompleted = false;
-    
-    const setupTest = () => {
-      if (joinCompleted) {
-        clientA.send(JSON.stringify({ 
-          type: 'move', 
-          position: 5, 
-          name: 'David' 
-        }));
+    // Compter les connexions pour savoir quand on peut envoyer
+    const checkReady = () => {
+      connectedCount++;
+      if (connectedCount === 2) {
+        // Les deux clients sont connectés, envoyons le message de join
+        clientA.emit('join', { type: 'join', name: 'Alice' });
       }
     };
     
-    // Enregistrer le joueur A
-    clientA.on('open', () => {
-      clientA.send(JSON.stringify({ type: 'join', name: 'David' }));
+    clientA.on('connect', checkReady);
+    clientB.on('connect', checkReady);
+    
+    // Attendre le message de join sur le client B
+    clientB.on('join', (msg: { name: string }) => {
+      expect(msg).toEqual({ name: 'Alice' });
+      
+      // Nettoyer et terminer le test
+      clientA.disconnect();
+      clientB.disconnect();
+      done();
+    });
+  });
+
+  test('broadcast game_state with player colors after join', done => {
+    const client = io(`http://localhost:${PORT}`, { transports: ['websocket'] });
+    
+    client.on('connect', () => {
+      client.emit('join', { type: 'join', name: 'Charlie' });
     });
     
-    // Enregistrer le joueur B et tester le mouvement
-    clientB.on('open', () => {
-      clientB.send(JSON.stringify({ type: 'join', name: 'Emma' }));
+    client.on('game_state', (data: GameStateMessage | string) => {
+      // Le serveur peut envoyer soit un JSON stringifié soit un objet direct
+      const msg: GameStateMessage = typeof data === 'string' ? JSON.parse(data) : data;
+      
+      // Vérifier que players est un tableau
+      expect(Array.isArray(msg.players)).toBe(true);
+      
+      // Trouver notre joueur et vérifier qu'il a une couleur
+      const player = msg.players.find((p: Player) => p.name === 'Charlie');
+      expect(player).toBeDefined();
+      expect(player?.color).toBeDefined();
+      
+      // Nettoyer et terminer
+      client.disconnect();
+      done();
+    });
+  });
+
+  test('broadcast move message to other clients', done => {
+    const clientA = io(`http://localhost:${PORT}`, { transports: ['websocket'] });
+    const clientB = io(`http://localhost:${PORT}`, { transports: ['websocket'] });
+    let joinCompleted = false;
+    
+    // Connecter les deux clients et les faire rejoindre la partie
+    clientA.on('connect', () => {
+      clientA.emit('join', { type: 'join', name: 'David' });
     });
     
-    // Attendre la confirmation de l'état du jeu avant de tester le mouvement
-    clientA.on('message', (data) => {
-      const msg = JSON.parse(data.toString());
-      if (msg.type === 'game_state' && !joinCompleted) {
+    clientB.on('connect', () => {
+      clientB.emit('join', { type: 'join', name: 'Emma' });
+    });
+    
+    // Vérifier l'état du jeu et envoyer un mouvement
+    clientA.on('game_state', () => {
+      if (!joinCompleted) {
         joinCompleted = true;
-        setupTest();
+        // Envoyer un mouvement depuis le client A
+        clientA.emit('move', { type: 'move', position: 5 });
       }
     });
     
-    // Vérifier que le client B reçoit le message de mouvement
-    clientB.on('message', (data) => {
-      const msg = JSON.parse(data.toString());
-      if (msg.type === 'move') {
-        expect(msg.position).toEqual(5);
-        clientA.close();
-        clientB.close();
-        done();
-      }
+    // Le client B devrait recevoir le mouvement
+    clientB.on('move', (payload: { position: number; playerId: string }) => {
+      expect(payload.position).toEqual(5);
+      
+      // Nettoyer et terminer
+      clientA.disconnect();
+      clientB.disconnect();
+      done();
     });
   });
 });

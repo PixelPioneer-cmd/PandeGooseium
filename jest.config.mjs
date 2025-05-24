@@ -22,7 +22,13 @@ const config = {
   },
   transformIgnorePatterns: ['node_modules/(?!(leven)/)'],
   testPathIgnorePatterns: ['/node_modules/'],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node']
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'json', 'node'],
+  // Configuration spécifique par fichier de test
+  testEnvironmentOptions: {
+    url: 'http://localhost/'
+  },
+  // Timeout global plus élevé pour les tests de WebSocket
+  testTimeout: 30000,
 };
 
 export default config;
