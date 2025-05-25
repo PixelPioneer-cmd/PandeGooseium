@@ -44,6 +44,15 @@ interface BoardProps {
   onRoll?: () => void;
   lastRoll?: number;
   disabled?: boolean;
+  isMulti: boolean;
+  toggleMode: () => void;
+  is3D: boolean;
+  toggleView: () => void;
+  isMyTurn?: boolean;
+  currentTurnPlayerId?: string | null;
+  connectedPlayers?: Player[];
+  feedback?: string;
+  position?: number;
 }
 
 // Hook to capture previous value
@@ -51,6 +60,65 @@ function usePrevious<T>(value: T): T | undefined {
   const ref = useRef<T>(value);
   useEffect(() => { ref.current = value; }, [value]);
   return ref.current;
+}
+
+// Composant pour afficher les feedbacks
+function FeedbackDisplay({ feedback, position }: { feedback?: string; position?: number }) {
+  const [isVisible, setIsVisible] = useState(false);
+  const [feedbackType, setFeedbackType] = useState<'success' | 'error' | 'info'>('info');
+  const [displayMessage, setDisplayMessage] = useState('');
+
+  useEffect(() => {
+    if (feedback) {
+      // Déterminer le type de feedback basé sur le contenu
+      const lowerFeedback = feedback.toLowerCase();
+      if (lowerFeedback.includes('bravo') || lowerFeedback.includes('correct') || lowerFeedback.includes('bonne') || lowerFeedback.includes('gagné')) {
+        setFeedbackType('success');
+      } else if (lowerFeedback.includes('faux') || lowerFeedback.includes('incorrecte') || lowerFeedback.includes('erreur') || lowerFeedback.includes('perdu')) {
+        setFeedbackType('error');
+      } else {
+        setFeedbackType('info');
+      }
+
+      setDisplayMessage(feedback);
+      setIsVisible(true);
+
+      // Auto-hide après 4 secondes
+      const timer = setTimeout(() => {
+        setIsVisible(false);
+      }, 4000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [feedback]);
+
+  // Ajout d'un message de victoire
+  useEffect(() => {
+    if (position === 40) {
+      setFeedbackType('success');
+      setDisplayMessage('🎉 Félicitations ! Vous avez gagné ! 🎉');
+      setIsVisible(true);
+    }
+  }, [position]);
+
+  if (!isVisible || !displayMessage) return null;
+
+  const getIcon = () => {
+    switch (feedbackType) {
+      case 'success': return '✅';
+      case 'error': return '❌';
+      default: return 'ℹ️';
+    }
+  };
+
+  return (
+    <div className={`${styles.feedbackOverlay} ${styles[feedbackType]}`}>
+      <p className={styles.feedbackMessage}>
+        <span className={styles.feedbackIcon}>{getIcon()}</span>
+        {displayMessage}
+      </p>
+    </div>
+  );
 }
 
 // Animated player for 2D board with jump animation
@@ -118,7 +186,7 @@ function AnimatedPlayer2D({ currentPosition, targetPosition, color, offset, spac
   );
 }
 
-export default function Board({ localPlayer, remotePlayers, onRoll, lastRoll, disabled }: BoardProps) {
+export default function Board({ localPlayer, remotePlayers, onRoll, lastRoll, disabled, isMulti, toggleMode, is3D, toggleView, isMyTurn, currentTurnPlayerId, connectedPlayers, feedback, position }: BoardProps) {
   const spacing = 1.2;
   const getHeight = (num: number) => isSpecial(num) ? 0.4 : 0.2;
   // Color mapping for special squares
@@ -154,11 +222,33 @@ export default function Board({ localPlayer, remotePlayers, onRoll, lastRoll, di
 
   return (
     <div className={styles.board3DContainer}>
-      {onRoll && (
-        <button className={styles.rollButton} onClick={onRoll} disabled={disabled}>
-          {lastRoll ? `🎲 ${lastRoll}` : '🎲 Lancer'}
-        </button>
-      )}
+      {/* Controls bar with title and all buttons */}
+      <div className={styles.controlsBar}>
+        <h2 className={styles.gameTitle}>L&apos;Oie des Enfers</h2>
+        {isMulti && (
+          <div className={styles.turnStatus}>
+            <span className={`${styles.turnIndicator} ${isMyTurn ? styles.myTurn : styles.waitingTurn}`}>
+              {isMyTurn 
+                ? "🟢 À votre tour" 
+                : `⏳ Tour de ${connectedPlayers?.find(p => p.id === currentTurnPlayerId)?.name || '...'}`
+              }
+            </span>
+          </div>
+        )}
+        <div className={styles.buttonGroup}>
+          <button onClick={toggleMode} className={styles.controlButton}>
+            Mode: {isMulti ? 'Multi' : 'Solo'}
+          </button>
+          <button onClick={toggleView} className={styles.controlButton}>
+            Vue: {is3D ? '3D' : '2D'}
+          </button>
+          {onRoll && (
+            <button className={styles.rollButton} onClick={onRoll} disabled={disabled}>
+              {lastRoll ? `🎲 ${lastRoll}` : '🎲 Lancer'}
+            </button>
+          )}
+        </div>
+      </div>
       <Canvas 
         camera={{ position: [4.5, 6, 10], fov: 50 }} 
         style={{ width: '100%', height: '100%' }}
@@ -273,6 +363,7 @@ export default function Board({ localPlayer, remotePlayers, onRoll, lastRoll, di
            ));
          })}
       </Canvas>
+      <FeedbackDisplay feedback={feedback} position={position} />
     </div>
   );
 }

@@ -72,33 +72,6 @@ export default function Home() {
       <div className="flex flex-col-reverse lg:flex-row gap-4">
         {/* Section principale du jeu */}
         <div className="lg:w-3/4 flex flex-col">
-          <div className="flex items-center mb-4 gap-4">
-            <button
-              onClick={toggleMode}
-              className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 transition-colors"
-            >
-              Mode: {isMulti ? 'Multijoueur' : 'Solo'}
-            </button>
-            
-            <button
-              onClick={() => setIs3D(!is3D)}
-              className="px-4 py-2 bg-blue-700 rounded hover:bg-blue-600 transition-colors"
-            >
-              Vue: {is3D ? '3D' : '2D'}
-            </button>
-            
-            {isMulti && (
-              <p className={`font-bold ${isMyTurn ? 'text-yellow-400 text-glow-yellow' : 'text-gray-400'}`}>
-                {isMyTurn 
-                  ? "C'est votre tour de jouer" 
-                  : `En attente du tour de ${connectedPlayers.find(p => p.id === currentTurnPlayerId)?.name || '...'}`
-                }
-              </p>
-            )}
-          </div>
-          
-          <h1 className="text-3xl mb-4 glow-text">L&#39;Oie des Enfers</h1>
-          
           {is3D ? (
             <Board3D 
               localPlayer={isMulti ? localPlayer : { id: 'local', name: 'Vous', position, color: '#FFD700' }}
@@ -110,6 +83,15 @@ export default function Home() {
               onRoll={rollDie}
               lastRoll={lastRoll}
               disabled={modalOpen || position === 40 || (isMulti && !isMyTurn)}
+              isMulti={isMulti}
+              toggleMode={toggleMode}
+              is3D={is3D}
+              toggleView={() => setIs3D(!is3D)}
+              isMyTurn={isMyTurn}
+              currentTurnPlayerId={currentTurnPlayerId}
+              connectedPlayers={connectedPlayers}
+              feedback={feedback}
+              position={position}
             />
           ) : (
             <Board 
@@ -122,11 +104,17 @@ export default function Home() {
               onRoll={rollDie}
               lastRoll={lastRoll}
               disabled={modalOpen || position === 40 || (isMulti && !isMyTurn)}
+              isMulti={isMulti}
+              toggleMode={toggleMode}
+              is3D={is3D}
+              toggleView={() => setIs3D(!is3D)}
+              isMyTurn={isMyTurn}
+              currentTurnPlayerId={currentTurnPlayerId}
+              connectedPlayers={connectedPlayers}
+              feedback={feedback}
+              position={position}
             />
           )}
-          
-          {feedback && <p className="mt-2 text-yellow-300">{feedback}</p>}
-          {position === 40 && <p className="mt-4 text-2xl text-green-400">Vous avez gagné ! 🎉</p>}
         </div>
         
         {/* Liste des joueurs et chat (sur le côté en desktop, en bas en mobile) */}

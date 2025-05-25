@@ -762,13 +762,9 @@
 
 /* === BOUTON DE LANCER LE DÉ EN 3D === */
 .rollButton {
-  position: absolute;
-  top: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
-  padding: 1rem 2rem;
-  font-size: 1.2rem;
+  /* Le bouton est maintenant intégré dans la barre de contrôles */
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
   font-weight: bold;
   background: linear-gradient(145deg, 
     rgba(255, 215, 0, 0.95) 0%,
@@ -788,7 +784,7 @@
 }
 
 .rollButton:hover {
-  transform: translateX(-50%) translateY(-2px) scale(1.05);
+  transform: translateY(-2px) scale(1.05);
   box-shadow: 
     0 15px 35px rgba(255, 215, 0, 0.5),
     0 5px 15px rgba(0, 0, 0, 0.4),
@@ -796,20 +792,247 @@
 }
 
 .rollButton:active {
-  transform: translateX(-50%) translateY(1px) scale(0.98);
+  transform: translateY(1px) scale(0.98);
 }
 
 .rollButton:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  transform: translateX(-50%) scale(1);
+  transform: scale(1);
   box-shadow: 
     0 4px 15px rgba(255, 215, 0, 0.2),
     0 1px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* === CONTRÔLES DU PLATEAU === */
+.controlsBar {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(145deg, 
+    rgba(26, 26, 46, 0.95) 0%,
+    rgba(52, 52, 90, 0.9) 50%,
+    rgba(74, 74, 128, 0.85) 100%
+  );
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 16px;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 2px 10px rgba(255, 215, 0, 0.2),
+    inset 0 2px 5px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.gameTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #FFD700;
+  text-shadow: 
+    0 0 10px rgba(255, 215, 0, 0.8),
+    0 2px 4px rgba(0, 0, 0, 0.5);
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.turnStatus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0.5rem;
+}
+
+.turnIndicator {
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.myTurn {
+  background: linear-gradient(145deg, 
+    rgba(34, 197, 94, 0.2) 0%,
+    rgba(22, 163, 74, 0.3) 100%
+  );
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.4);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  animation: pulseGreen 2s ease-in-out infinite;
+}
+
+.waitingTurn {
+  background: linear-gradient(145deg, 
+    rgba(156, 163, 175, 0.2) 0%,
+    rgba(107, 114, 128, 0.3) 100%
+  );
+  color: #9ca3af;
+  border-color: rgba(156, 163, 175, 0.4);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes pulseGreen {
+  0% { 
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+    transform: scale(1.02);
+  }
+  100% { 
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    transform: scale(1);
+  }
+}
+
+.controlButton {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: linear-gradient(145deg, 
+    rgba(107, 114, 142, 0.9) 0%,
+    rgba(75, 85, 99, 0.85) 50%,
+    rgba(55, 65, 81, 0.8) 100%
+  );
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  box-shadow: 
+    0 4px 15px rgba(0, 0, 0, 0.3),
+    inset 0 1px 3px rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.controlButton:hover {
+  transform: translateY(-2px) scale(1.05);
+  background: linear-gradient(145deg, 
+    rgba(59, 130, 246, 0.9) 0%,
+    rgba(37, 99, 235, 0.85) 50%,
+    rgba(29, 78, 216, 0.8) 100%
+  );
+  box-shadow: 
+    0 8px 25px rgba(59, 130, 246, 0.4),
+    0 3px 10px rgba(0, 0, 0, 0.4),
+    inset 0 1px 3px rgba(255, 255, 255, 0.3);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.controlButton:active {
+  transform: translateY(1px) scale(0.98);
+  box-shadow: 
+    0 2px 10px rgba(0, 0, 0, 0.3),
+    inset 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 /* Adjust Canvas to fill parent */
 .canvasContainer {
   width: 100%;
   height: 100%;
+}
+
+/* === AFFICHAGE DES RÉSULTATS DE QUESTIONS SUR LE PLATEAU === */
+.feedbackOverlay {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  padding: 1rem 2rem;
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 2px 10px rgba(0, 0, 0, 0.2),
+    inset 0 2px 5px rgba(255, 255, 255, 0.1);
+  transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  animation: feedbackSlideIn 0.5s ease-out;
+  max-width: 400px;
+  text-align: center;
+}
+
+.feedbackOverlay.success {
+  background: linear-gradient(145deg, 
+    rgba(34, 197, 94, 0.9) 0%,
+    rgba(22, 163, 74, 0.85) 50%,
+    rgba(16, 185, 129, 0.8) 100%
+  );
+  border: 2px solid rgba(34, 197, 94, 0.6);
+  color: #ffffff;
+}
+
+.feedbackOverlay.error {
+  background: linear-gradient(145deg, 
+    rgba(239, 68, 68, 0.9) 0%,
+    rgba(220, 38, 38, 0.85) 50%,
+    rgba(185, 28, 28, 0.8) 100%
+  );
+  border: 2px solid rgba(239, 68, 68, 0.6);
+  color: #ffffff;
+}
+
+.feedbackOverlay.info {
+  background: linear-gradient(145deg, 
+    rgba(59, 130, 246, 0.9) 0%,
+    rgba(37, 99, 235, 0.85) 50%,
+    rgba(29, 78, 216, 0.8) 100%
+  );
+  border: 2px solid rgba(59, 130, 246, 0.6);
+  color: #ffffff;
+}
+
+.feedbackMessage {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.feedbackIcon {
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+  display: inline-block;
+}
+
+@keyframes feedbackSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+/* Animation de disparition */
+.feedbackOverlay.fadeOut {
+  animation: feedbackSlideOut 0.5s ease-in forwards;
+}
+
+@keyframes feedbackSlideOut {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px) scale(0.9);
+  }
 }
