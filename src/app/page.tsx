@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Board from './components/Board';
-import Die from './components/Die';
 import PlayerList from './components/PlayerList';
 import QuestionModal from './components/QuestionModal';
 import { useWebSocket, Player } from '../hooks/useWebSocket';
@@ -98,15 +97,10 @@ export default function Home() {
                 ? connectedPlayers.find(p => p.id === currentOpponent.id) || null 
                 : null
             }
+            onRoll={rollDie}
+            lastRoll={lastRoll}
+            disabled={modalOpen || position === 40 || (isMulti && !isMyTurn)}
           />
-          
-          <div className="mt-4">
-            <Die 
-              onRoll={rollDie} 
-              lastRoll={lastRoll} 
-              disabled={modalOpen || position === 40 || (isMulti && !isMyTurn)} 
-            />
-          </div>
           
           {feedback && <p className="mt-2 text-yellow-300">{feedback}</p>}
           {position === 40 && <p className="mt-4 text-2xl text-green-400">Vous avez gagné ! 🎉</p>}
