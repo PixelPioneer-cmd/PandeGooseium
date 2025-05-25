@@ -79,7 +79,7 @@ function setupSocketIO(server) {
     console.log('Nouveau client Socket.IO connecté:', socket.id);
 
     socket.on('join', (data) => {
-      const playerName = data.name;
+      const playerName = data.name?.trim(); // Normalisation : trim des espaces
       const initialPosition = data.position || 0;
       
       console.log('🔍 Tentative de join avec:', {
@@ -96,7 +96,7 @@ function setupSocketIO(server) {
 
       const newPlayer = {
         id: socket.id,
-        name: playerName,
+        name: playerName, // Utiliser le nom normalisé
         position: initialPosition,
         color: getRandomColor()
       };

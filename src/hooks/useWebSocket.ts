@@ -92,7 +92,8 @@ export function useWebSocket(
   }, []);
 
   const sendChat = useCallback((messageText: string) => {
-    if (!localName) {
+    const trimmedName = localName?.trim();
+    if (!trimmedName) {
       console.log("⚠️ Pas de nom local défini, impossible d'envoyer le chat");
       return;
     }
@@ -102,13 +103,13 @@ export function useWebSocket(
       return;
     }
     
-    console.log("📤 Envoi d'un message chat:", messageText, "de", localName);
+    console.log("📤 Envoi d'un message chat:", messageText, "de", trimmedName);
     
     // Avec Socket.IO, on émet directement l'événement 'chat'
     socketRef.current.emit('chat', { 
       type: 'chat', 
       message: messageText,
-      name: localName,
+      name: trimmedName, // Utiliser le nom normalisé
       timestamp: Date.now()
     });
   }, [localName]);
@@ -139,13 +140,15 @@ export function useWebSocket(
     socket.on('connect', () => {
       console.log('Socket.IO connecté, ID:', socket.id);
       console.log('Transport utilisé:', socket.io.engine.transport.name);
-      console.log('🏷️ Avant envoi join - localName:', `"${localName}"`);
+      
+      const trimmedName = localName?.trim();
+      console.log('🏷️ Avant envoi join - localName:', `"${localName}"`, '-> normalisé:', `"${trimmedName}"`);
       console.log('🏷️ Avant envoi join - initialPosition:', initialPosition);
       
-      // Joindre la partie avec notre nom et position
+      // Joindre la partie avec notre nom normalisé et position
       const joinData = { 
         type: 'join', 
-        name: localName, 
+        name: trimmedName, 
         position: initialPosition 
       };
       console.log('📤 Données join envoyées:', joinData);
@@ -172,8 +175,10 @@ export function useWebSocket(
       // Mettre à jour la liste des joueurs
       setConnectedPlayers(players);
 
-      // Mettre à jour notre joueur local
-      const myPlayer = players.find(p => p.name === localName);
+      // Mettre à jour notre joueur local - recherche insensible à la casse
+      const myPlayer = players.find(p => 
+        p.name.toLowerCase().trim() === localName.toLowerCase().trim()
+      );
       if (myPlayer) {
         console.log('🤵 Joueur local trouvé dans game_state:', myPlayer);
         myIdRef.current = myPlayer.id;
@@ -182,10 +187,12 @@ export function useWebSocket(
       } else {
         console.log('⚠️ Joueur local non trouvé dans game_state, nom cherché:', `"${localName}"`);
         console.log('⚠️ Noms disponibles côté serveur:', players.map(p => `"${p.name}"`));
-        console.log('⚠️ Comparaison exacte:', players.map(p => ({
+        console.log('⚠️ Comparaison insensible à la casse:', players.map(p => ({
           server: p.name,
+          serverLower: p.name.toLowerCase().trim(),
           local: localName,
-          match: p.name === localName,
+          localLower: localName.toLowerCase().trim(),
+          match: p.name.toLowerCase().trim() === localName.toLowerCase().trim(),
           serverLength: p.name.length,
           localLength: localName.length
         })));
@@ -202,11 +209,16 @@ export function useWebSocket(
     
     // Écouter la confirmation de join
     socket.on('joined', (data) => {
-      console.log('Rejoint avec succès:', data);
+      console.log('✅ Rejoint avec succès:', data);
+      console.log('🆔 Player ID assigné:', data.playerId);
+      console.log('🤵 Player data:', data.player);
+      
       myIdRef.current = data.playerId;
       setLocalPlayer(data.player);
       setCurrentTurnPlayerId(data.currentTurnPlayerId);
       setIsMyTurn(data.currentTurnPlayerId === data.playerId);
+      
+      console.log('🎲 Tour initial - Mon ID:', data.playerId, 'Tour actuel:', data.currentTurnPlayerId, 'Mon tour:', data.currentTurnPlayerId === data.playerId);
     });
     
     // Écouter les messages d'erreur
