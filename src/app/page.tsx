@@ -58,7 +58,11 @@ export default function Home() {
   useEffect(() => {
     if (isMulti && !localName) {
       const name = prompt('Entrez votre nom') || `Joueur${Math.floor(Math.random()*1000)}`;
+      console.log('🏷️ Nom saisi par l\'utilisateur:', `"${name}"`);
+      console.log('🏷️ Longueur du nom:', name.length);
+      console.log('🏷️ Type du nom:', typeof name);
       setLocalName(name);
+      console.log('🏷️ localName défini dans state:', `"${name}"`);
     }
   }, [isMulti, localName]);
   

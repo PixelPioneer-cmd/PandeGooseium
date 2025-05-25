@@ -58,21 +58,26 @@ export function useWebSocket(
   const getWebSocketURL = () => {
     // Si une URL explicite est fournie via .env, l'utiliser
     if (process.env.NEXT_PUBLIC_WS_SERVER) {
+      console.log('🔗 URL WebSocket depuis .env:', process.env.NEXT_PUBLIC_WS_SERVER);
       return process.env.NEXT_PUBLIC_WS_SERVER;
     }
     
     // En production, utiliser la même URL que l'application web
     if (typeof window !== 'undefined') {
-      const { protocol, hostname } = window.location;
+      const { protocol, hostname, port } = window.location;
+      console.log('🌍 Détection environnement:', { protocol, hostname, port });
       
       // Sur Render, l'app web et le WebSocket partagent le même port
       if (hostname.includes('onrender.com')) {
         const wsProtocol = protocol === 'https:' ? 'https:' : 'http:';
-        return `${wsProtocol}//${hostname}`;
+        const wsUrl = `${wsProtocol}//${hostname}`;
+        console.log('🚀 URL WebSocket Render:', wsUrl);
+        return wsUrl;
       }
     }
     
     // Fallback pour le développement local
+    console.log('🏠 URL WebSocket local:', 'http://localhost:4000');
     return 'http://localhost:4000';
   };
 
@@ -87,25 +92,39 @@ export function useWebSocket(
   }, []);
 
   const sendChat = useCallback((messageText: string) => {
-    if (!localName || !myIdRef.current) return;
+    const trimmedName = localName?.trim();
+    if (!trimmedName) {
+      console.log("⚠️ Pas de nom local défini, impossible d'envoyer le chat");
+      return;
+    }
     
-    console.log("Envoi d'un message chat:", messageText);
+    if (!socketRef.current?.connected) {
+      console.log("⚠️ Socket non connecté, impossible d'envoyer le chat");
+      return;
+    }
+    
+    console.log("📤 Envoi d'un message chat:", messageText, "de", trimmedName);
     
     // Avec Socket.IO, on émet directement l'événement 'chat'
-    if (socketRef.current?.connected) {
-      socketRef.current.emit('chat', { 
-        type: 'chat', 
-        message: messageText,
-        name: localName,
-        timestamp: Date.now()
-      });
-    }
+    socketRef.current.emit('chat', { 
+      type: 'chat', 
+      message: messageText,
+      name: trimmedName, // Utiliser le nom normalisé
+      timestamp: Date.now()
+    });
   }, [localName]);
 
   useEffect(() => {
     if (!isMulti) return;
+    
+    // Ne pas se connecter si on n'a pas de nom
+    if (!localName || localName.trim() === '') {
+      console.log('⏳ Pas de localName, attente...');
+      return;
+    }
 
     console.log('Tentative de connexion à:', WS_SERVER);
+    console.log('🏷️ Connexion avec localName:', `"${localName}"`);
     
     // Créer une nouvelle connexion Socket.IO avec configuration robuste pour Render
     const socket = io(WS_SERVER, {
@@ -122,12 +141,18 @@ export function useWebSocket(
       console.log('Socket.IO connecté, ID:', socket.id);
       console.log('Transport utilisé:', socket.io.engine.transport.name);
       
-      // Joindre la partie avec notre nom et position
-      socket.emit('join', { 
+      const trimmedName = localName?.trim();
+      console.log('🏷️ Avant envoi join - localName:', `"${localName}"`, '-> normalisé:', `"${trimmedName}"`);
+      console.log('🏷️ Avant envoi join - initialPosition:', initialPosition);
+      
+      // Joindre la partie avec notre nom normalisé et position
+      const joinData = { 
         type: 'join', 
-        name: localName, 
+        name: trimmedName, 
         position: initialPosition 
-      });
+      };
+      console.log('📤 Données join envoyées:', joinData);
+      socket.emit('join', joinData);
     });
     
     socket.on('connect_error', (error) => {
@@ -137,25 +162,63 @@ export function useWebSocket(
     
     // Écouter les messages game_state
     socket.on('game_state', (data) => {
-      console.log('Reçu game_state:', data);
+      console.log('📊 Reçu game_state:', data);
       
       // Le serveur peut envoyer une chaîne JSON ou un objet
       const parsed = typeof data === 'string' ? JSON.parse(data) : data;
       const players = parsed.players as Player[];
       
+      console.log('👥 Joueurs mis à jour:', players);
+      console.log('🔍 Recherche du joueur local avec nom:', `"${localName}"`);
+      console.log('🔍 Noms des joueurs disponibles:', players.map(p => `"${p.name}"`));
+      
       // Mettre à jour la liste des joueurs
       setConnectedPlayers(players);
 
-      // Mettre à jour notre joueur local
-      const myPlayer = players.find(p => p.name === localName);
+      // Mettre à jour notre joueur local - recherche insensible à la casse
+      const myPlayer = players.find(p => 
+        p.name.toLowerCase().trim() === localName.toLowerCase().trim()
+      );
       if (myPlayer) {
+        console.log('🤵 Joueur local trouvé dans game_state:', myPlayer);
         myIdRef.current = myPlayer.id;
         setLocalPlayer(myPlayer);
+        console.log('🤵 Joueur local mis à jour via game_state:', myPlayer);
+      } else {
+        console.log('⚠️ Joueur local non trouvé dans game_state, nom cherché:', `"${localName}"`);
+        console.log('⚠️ Noms disponibles côté serveur:', players.map(p => `"${p.name}"`));
+        console.log('⚠️ Comparaison insensible à la casse:', players.map(p => ({
+          server: p.name,
+          serverLower: p.name.toLowerCase().trim(),
+          local: localName,
+          localLower: localName.toLowerCase().trim(),
+          match: p.name.toLowerCase().trim() === localName.toLowerCase().trim(),
+          serverLength: p.name.length,
+          localLength: localName.length
+        })));
       }
 
       // Mettre à jour l'ID du joueur dont c'est le tour et le flag
       setCurrentTurnPlayerId(parsed.currentTurnPlayerId);
-      setIsMyTurn(parsed.currentTurnPlayerId === myIdRef.current);
+      
+      // Utiliser soit myIdRef.current (si défini) soit myPlayer.id pour déterminer le tour
+      const myCurrentId = myIdRef.current || myPlayer?.id;
+      setIsMyTurn(parsed.currentTurnPlayerId === myCurrentId);
+      console.log('🎲 Tour actuel:', parsed.currentTurnPlayerId, 'Mon ID:', myCurrentId, 'Mon tour:', parsed.currentTurnPlayerId === myCurrentId);
+    });
+    
+    // Écouter la confirmation de join
+    socket.on('joined', (data) => {
+      console.log('✅ Rejoint avec succès:', data);
+      console.log('🆔 Player ID assigné:', data.playerId);
+      console.log('🤵 Player data:', data.player);
+      
+      myIdRef.current = data.playerId;
+      setLocalPlayer(data.player);
+      setCurrentTurnPlayerId(data.currentTurnPlayerId);
+      setIsMyTurn(data.currentTurnPlayerId === data.playerId);
+      
+      console.log('🎲 Tour initial - Mon ID:', data.playerId, 'Tour actuel:', data.currentTurnPlayerId, 'Mon tour:', data.currentTurnPlayerId === data.playerId);
     });
     
     // Écouter les messages d'erreur
@@ -167,26 +230,40 @@ export function useWebSocket(
     
     // Écouter les messages de chat
     socket.on('chat', (msg) => {
-      console.log('Message chat reçu:', msg);
+      console.log('💬 Message chat reçu:', msg);
       const ts = msg.timestamp as number;
-      if (!ts) return;
+      if (!ts) {
+        console.log('⚠️ Message chat sans timestamp ignoré');
+        return;
+      }
       
       // Filtrer les doublons
-      if (processedChatTimestamps.current.has(ts)) return;
+      if (processedChatTimestamps.current.has(ts)) {
+        console.log('🔄 Message chat doublon ignoré:', ts);
+        return;
+      }
       processedChatTimestamps.current.add(ts);
 
       // Ajouter le message
-      setChatMessages(prev => [...prev, { 
+      const newMessage = { 
         playerId: msg.playerId,
         name: msg.name,
         message: msg.message,
         color: msg.color,
         timestamp: ts
-      }]);
+      };
+      console.log('✅ Ajout message chat:', newMessage);
+      setChatMessages(prev => [...prev, newMessage]);
     });
     
     socket.on('join', (msg) => {
       console.log('Nouveau joueur rejoint:', msg);
+    });
+    
+    socket.on('player_moved', (msg) => {
+      console.log('Joueur déplacé:', msg);
+      // Actualiser l'état du jeu quand un joueur bouge
+      setFeedback(`${msg.player.name} s'est déplacé à la case ${msg.newPosition}`);
     });
     
     socket.on('move', (msg) => {

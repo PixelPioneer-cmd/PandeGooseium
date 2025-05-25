@@ -1,23 +1,43 @@
-import { createServer } from 'http';
-import { parse } from 'url';
-import next from 'next';
+import { NextRequest } from 'next/server';
 import { Server as SocketIOServer } from 'socket.io';
+import { Server as HttpServer } from 'http';
 
-const dev = process.env.NODE_ENV !== 'production';
-const hostname = process.env.HOSTNAME || 'localhost';
-const port = parseInt(process.env.PORT || '3000', 10);
+interface Player {
+  id: string;
+  name: string;
+  position: number;
+  color: string;
+}
 
-// Variables globales pour Socket.IO
-let io = null;
-const connectedPlayers = new Map();
-let currentTurnPlayerId = null;
+interface WebSocketMessage {
+  type: string;
+  name?: string;
+  position?: number;
+  [key: string]: unknown;
+}
 
+// Instance globale du serveur Socket.IO
+let io: SocketIOServer | null = null;
+
+// Liste des joueurs connectés
+const connectedPlayers = new Map<string, Player>();
+
+// Gestion des tours
+let currentTurnPlayerId: string | null = null;
+
+// Couleurs disponibles pour les joueurs
 const availableColors = [
-  "#FFD700", "#3B82F6", "#EF4444", "#10B981",
-  "#F59E0B", "#8B5CF6", "#EC4899", "#06B6D4"
+  "#FFD700", // Or
+  "#3B82F6", // Bleu vif
+  "#EF4444", // Rouge vif
+  "#10B981", // Vert vif
+  "#F59E0B", // Orange
+  "#8B5CF6", // Violet
+  "#EC4899", // Rose
+  "#06B6D4", // Cyan
 ];
 
-function getRandomColor() {
+function getRandomColor(): string {
   const usedColors = new Set(Array.from(connectedPlayers.values()).map(p => p.color));
   const availableColorsFiltered = availableColors.filter(color => !usedColors.has(color));
   
@@ -28,7 +48,7 @@ function getRandomColor() {
   return availableColorsFiltered[Math.floor(Math.random() * availableColorsFiltered.length)];
 }
 
-function setNextPlayerTurn() {
+function setNextPlayerTurn(): void {
   const playerIds = Array.from(connectedPlayers.keys());
   if (playerIds.length === 0) {
     currentTurnPlayerId = null;
@@ -44,28 +64,20 @@ function setNextPlayerTurn() {
   }
 }
 
-function broadcastGameState() {
+function broadcastGameState(): void {
   if (!io) return;
   
   const playersArray = Array.from(connectedPlayers.values());
   
-  console.log('🎮 Diffusion game_state avec joueurs:', playersArray.map(p => ({
-    id: p.id,
-    name: p.name,
-    nameLength: p.name.length,
-    position: p.position,
-    color: p.color
-  })));
-  
-  io.emit('game_state', {
-    type: 'game_state',
+  io.emit('players', {
+    type: 'players',
     players: playersArray,
-    currentTurnPlayerId: currentTurnPlayerId
+    currentTurn: currentTurnPlayerId
   });
 }
 
-function setupSocketIO(server) {
-  io = new SocketIOServer(server, {
+function initializeSocketIO(server: HttpServer): SocketIOServer {
+  const socketIO = new SocketIOServer(server, {
     cors: {
       origin: "*",
       methods: ["GET", "POST"],
@@ -75,41 +87,26 @@ function setupSocketIO(server) {
     allowEIO3: true
   });
 
-  io.on('connection', (socket) => {
+  socketIO.on('connection', (socket) => {
     console.log('Nouveau client Socket.IO connecté:', socket.id);
 
-    socket.on('join', (data) => {
-      const playerName = data.name?.trim(); // Normalisation : trim des espaces
-      const initialPosition = data.position || 0;
-      
-      console.log('🔍 Tentative de join avec:', {
-        name: playerName,
-        nameType: typeof playerName,
-        nameLength: playerName ? playerName.length : 'undefined',
-        rawData: data
-      });
+    socket.on('join', (data: WebSocketMessage) => {
+      const playerName = data.name as string;
+      const initialPosition = (data.position as number) || 0;
       
       if (!playerName) {
         socket.emit('error', { type: 'error', message: 'Nom de joueur requis' });
         return;
       }
 
-      const newPlayer = {
+      const newPlayer: Player = {
         id: socket.id,
-        name: playerName, // Utiliser le nom normalisé
+        name: playerName,
         position: initialPosition,
         color: getRandomColor()
       };
 
       connectedPlayers.set(socket.id, newPlayer);
-      
-      console.log('👤 Joueur ajouté:', {
-        id: newPlayer.id,
-        name: `"${newPlayer.name}"`,
-        nameLength: newPlayer.name.length,
-        position: newPlayer.position,
-        color: newPlayer.color
-      });
 
       if (currentTurnPlayerId === null && connectedPlayers.size === 1) {
         currentTurnPlayerId = socket.id;
@@ -119,14 +116,14 @@ function setupSocketIO(server) {
         type: 'joined',
         playerId: socket.id,
         player: newPlayer,
-        currentTurnPlayerId: currentTurnPlayerId
+        currentTurn: currentTurnPlayerId
       });
 
       broadcastGameState();
       console.log(`Joueur ${playerName} rejoint (${socket.id})`);
     });
 
-    socket.on('move', (data) => {
+    socket.on('move', (data: WebSocketMessage) => {
       const player = connectedPlayers.get(socket.id);
       if (!player) {
         socket.emit('error', { type: 'error', message: 'Joueur non trouvé' });
@@ -138,12 +135,12 @@ function setupSocketIO(server) {
         return;
       }
 
-      const newPosition = data.position;
+      const newPosition = data.position as number;
       if (typeof newPosition === 'number' && newPosition >= 0) {
         player.position = newPosition;
         connectedPlayers.set(socket.id, player);
 
-        io.emit('player_moved', {
+        socketIO.emit('player_moved', {
           type: 'player_moved',
           playerId: socket.id,
           newPosition: newPosition,
@@ -156,7 +153,7 @@ function setupSocketIO(server) {
       }
     });
 
-    socket.on('chat', (data) => {
+    socket.on('chat', (data: WebSocketMessage) => {
       const player = connectedPlayers.get(socket.id);
       if (!player) return;
 
@@ -169,7 +166,7 @@ function setupSocketIO(server) {
         timestamp: data.timestamp || Date.now()
       };
 
-      io.emit('chat', chatData);
+      socketIO.emit('chat', chatData);
       console.log(`Chat de ${player.name}: ${data.message}`);
     });
 
@@ -189,40 +186,26 @@ function setupSocketIO(server) {
     });
   });
 
+  return socketIO;
+}
+
+export async function GET(request: NextRequest) {
+  // Cette route est utilisée pour initialiser Socket.IO côté client
+  return new Response(JSON.stringify({ message: 'Socket.IO endpoint ready' }), {
+    headers: { 'Content-Type': 'application/json' },
+  });
+}
+
+// Fonction pour obtenir ou créer l'instance Socket.IO
+export function getSocketIO(): SocketIOServer | null {
   return io;
 }
 
-// Préparer l'application Next.js
-const app = next({ dev, hostname, port });
-const handle = app.getRequestHandler();
-
-app.prepare().then(() => {
-  // Créer le serveur HTTP
-  const server = createServer(async (req, res) => {
-    try {
-      const parsedUrl = parse(req.url, true);
-      await handle(req, res, parsedUrl);
-    } catch (err) {
-      console.error('Error occurred handling', req.url, err);
-      res.statusCode = 500;
-      res.end('internal server error');
-    }
-  });
-
-  // Initialiser Socket.IO sur le serveur HTTP
-  setupSocketIO(server);
-
-  // Démarrer le serveur
-  server.listen(port, () => {
-    console.log(`> Ready on http://${hostname}:${port}`);
-    console.log(`> Socket.IO server running on the same port`);
-  });
-
-  // Gestion propre de l'arrêt
-  process.on('SIGTERM', () => {
-    console.log('SIGTERM received, shutting down gracefully');
-    server.close(() => {
-      console.log('Process terminated');
-    });
-  });
-});
+// Fonction pour initialiser Socket.IO avec le serveur HTTP de Next.js
+export function setupSocketIO(server: HttpServer): SocketIOServer {
+  if (!io) {
+    io = initializeSocketIO(server);
+    console.log('Socket.IO server initialized on Next.js HTTP server');
+  }
+  return io;
+}
