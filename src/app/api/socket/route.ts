@@ -189,7 +189,7 @@ function initializeSocketIO(server: HttpServer): SocketIOServer {
   return socketIO;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(/*request: NextRequest*/) {
   // Cette route est utilisée pour initialiser Socket.IO côté client
   return new Response(JSON.stringify({ message: 'Socket.IO endpoint ready' }), {
     headers: { 'Content-Type': 'application/json' },
