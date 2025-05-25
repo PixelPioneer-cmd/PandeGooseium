@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Board from './components/Board';
+import Board3D from './components/Board3D';
 import PlayerList from './components/PlayerList';
 import QuestionModal from './components/QuestionModal';
 import { useWebSocket, Player } from '../hooks/useWebSocket';
@@ -12,6 +13,7 @@ export default function Home() {
   const [isMulti, setIsMulti] = useState<boolean>(false);
   const [localName, setLocalName] = useState<string>('');
   const [currentOpponent, setCurrentOpponent] = useState<Player | null>(null);
+  const [is3D, setIs3D] = useState<boolean>(false);
   
   // Utilisation des hooks personnalisés
   const {
@@ -70,12 +72,19 @@ export default function Home() {
       <div className="flex flex-col-reverse lg:flex-row gap-4">
         {/* Section principale du jeu */}
         <div className="lg:w-3/4 flex flex-col">
-          <div className="flex items-center mb-4">
+          <div className="flex items-center mb-4 gap-4">
             <button
               onClick={toggleMode}
-              className="mr-4 px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 transition-colors"
+              className="px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 transition-colors"
             >
               Mode: {isMulti ? 'Multijoueur' : 'Solo'}
+            </button>
+            
+            <button
+              onClick={() => setIs3D(!is3D)}
+              className="px-4 py-2 bg-blue-700 rounded hover:bg-blue-600 transition-colors"
+            >
+              Vue: {is3D ? '3D' : '2D'}
             </button>
             
             {isMulti && (
@@ -90,17 +99,31 @@ export default function Home() {
           
           <h1 className="text-3xl mb-4 glow-text">L&#39;Oie des Enfers</h1>
           
-          <Board 
-            localPlayer={isMulti ? localPlayer : { id: 'local', name: 'Vous', position, color: '#FFD700' }}
-            remotePlayer={
-              isMulti && currentOpponent 
-                ? connectedPlayers.find(p => p.id === currentOpponent.id) || null 
-                : null
-            }
-            onRoll={rollDie}
-            lastRoll={lastRoll}
-            disabled={modalOpen || position === 40 || (isMulti && !isMyTurn)}
-          />
+          {is3D ? (
+            <Board3D 
+              localPlayer={isMulti ? localPlayer : { id: 'local', name: 'Vous', position, color: '#FFD700' }}
+              remotePlayers={
+                isMulti 
+                  ? connectedPlayers.filter(p => p.name !== localName)
+                  : []
+              }
+              onRoll={rollDie}
+              lastRoll={lastRoll}
+              disabled={modalOpen || position === 40 || (isMulti && !isMyTurn)}
+            />
+          ) : (
+            <Board 
+              localPlayer={isMulti ? localPlayer : { id: 'local', name: 'Vous', position, color: '#FFD700' }}
+              remotePlayers={
+                isMulti 
+                  ? connectedPlayers.filter(p => p.name !== localName)
+                  : []
+              }
+              onRoll={rollDie}
+              lastRoll={lastRoll}
+              disabled={modalOpen || position === 40 || (isMulti && !isMyTurn)}
+            />
+          )}
           
           {feedback && <p className="mt-2 text-yellow-300">{feedback}</p>}
           {position === 40 && <p className="mt-4 text-2xl text-green-400">Vous avez gagné ! 🎉</p>}
