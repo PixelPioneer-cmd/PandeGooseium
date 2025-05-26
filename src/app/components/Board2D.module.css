@@ -1,21 +1,125 @@
-/* === STYLES SIMPLIFIÉS POUR MODE 2D === */
+/* === PANDEMONIUM BOARD - INFERNAL 2D THEME (DARKER PALETTE) === */
 
-/* Animation simple pour case active */
-@keyframes subtleGlow {
-  0% { opacity: 0.8; }
-  100% { opacity: 1; }
+/* Animations des enfers */
+@keyframes hellishGlow {
+  0% { 
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.4), inset 0 0 25px rgba(139, 69, 19, 0.3);
+    transform: scale(1);
+    filter: brightness(1) saturate(1.2);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(239, 68, 68, 0.7), inset 0 0 35px rgba(185, 28, 28, 0.5);
+    transform: scale(1.03);
+    filter: brightness(1.2) saturate(1.5);
+  }
+  100% { 
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.4), inset 0 0 25px rgba(139, 69, 19, 0.3);
+    transform: scale(1);
+    filter: brightness(1) saturate(1.2);
+  }
 }
 
-@keyframes fadeIn {
-  0% { opacity: 0; transform: translateY(10px); }
-  100% { opacity: 1; transform: translateY(0); }
+@keyframes emberFloat {
+  0% { 
+    opacity: 0.5; 
+    transform: translateY(0px) rotate(0deg) scale(1);
+    filter: brightness(0.8) hue-rotate(0deg);
+  }
+  33% { 
+    opacity: 0.9; 
+    transform: translateY(-8px) rotate(120deg) scale(1.1);
+    filter: brightness(1.3) hue-rotate(15deg);
+  }
+  66% { 
+    opacity: 0.7; 
+    transform: translateY(-4px) rotate(240deg) scale(0.95);
+    filter: brightness(1.1) hue-rotate(-10deg);
+  }
+  100% { 
+    opacity: 0.5; 
+    transform: translateY(0px) rotate(360deg) scale(1);
+    filter: brightness(0.8) hue-rotate(0deg);
+  }
 }
 
-/* === CONTENEUR PRINCIPAL === */
+@keyframes fadeInFromHell {
+  0% { 
+    opacity: 0; 
+    transform: translateY(30px) scale(0.7) rotateX(45deg);
+    filter: blur(8px) brightness(2);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(10px) scale(0.9) rotateX(20deg);
+    filter: blur(2px) brightness(1.5);
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0) scale(1) rotateX(0deg);
+    filter: blur(0px) brightness(1);
+  }
+}
+
+@keyframes smokeWave {
+  0% { 
+    background-position: 0% 50%, 100% 50%;
+    filter: hue-rotate(0deg) saturate(1);
+    opacity: 0.7;
+  }
+  25% {
+    background-position: 25% 25%, 75% 75%;
+    filter: hue-rotate(10deg) saturate(1.2);
+    opacity: 0.9;
+  }
+  50% { 
+    background-position: 100% 0%, 0% 100%;
+    filter: hue-rotate(20deg) saturate(1.4);
+    opacity: 1;
+  }
+  75% {
+    background-position: 75% 75%, 25% 25%;
+    filter: hue-rotate(10deg) saturate(1.2);
+    opacity: 0.9;
+  }
+  100% { 
+    background-position: 0% 50%, 100% 50%;
+    filter: hue-rotate(0deg) saturate(1);
+    opacity: 0.7;
+  }
+}
+
+@keyframes infernalPulse {
+  0% { 
+    border-color: #dc2626;
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.4), inset 0 0 10px rgba(139, 69, 19, 0.2);
+    transform: scale(1);
+  }
+  50% { 
+    border-color: #f97316;
+    box-shadow: 0 0 30px rgba(249, 115, 22, 0.8), inset 0 0 20px rgba(185, 28, 28, 0.4);
+    transform: scale(1.05);
+  }
+  100% { 
+    border-color: #dc2626;
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.4), inset 0 0 10px rgba(139, 69, 19, 0.2);
+    transform: scale(1);
+  }
+}
+
+@keyframes shadowFlicker {
+  0%, 100% { 
+    text-shadow: 0 0 5px rgba(220, 38, 38, 0.5), 0 0 10px rgba(139, 69, 19, 0.3);
+  }
+  50% { 
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.8), 0 0 20px rgba(185, 28, 28, 0.5);
+  }
+}
+
+/* === CONTENEUR INFERNAL === */
 .boardContainer {
   padding: 20px;
   overflow: visible;
-  background: transparent !important;
+  background: none !important;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -25,10 +129,11 @@
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
-  transition: all 0.3s ease;
+  transition: all 0.4s ease;
+  animation: none;
 }
 
-/* Variante si le chat est affiché (ex: .withChat sur le container) */
+/* Variante avec chat - atmosphère adaptée */
 .boardContainer.withChat {
   display: flex;
   flex-direction: row;
@@ -39,9 +144,10 @@
   padding: 0;
   margin: 0;
   box-sizing: border-box;
-  background: transparent;
+  background: none !important;
   min-height: 100vh;
   transition: none;
+  animation: none;
 }
 
 .board2DWrapper {
@@ -86,25 +192,59 @@
   max-height: 90vh;
   position: relative;
   
-  border: 2px solid #e2e8f0;
+  border: 2px solid #23272f;
   border-radius: 16px;
   padding: 32px;
   
-  background: white;
-  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.13);
-  transition: all 0.3s ease;
+  background: transparent;
+  box-shadow: 0 0 0 2px #ff1a1a, 0 0 16px 2px #ff1a1a, 0 0 32px 8px #ff1a1a55;
+  animation: neonBoardRed 2.5s linear infinite;
 }
 
-/* Styles quand le chat est visible ET le container withChat */
-.boardContainer.withChat .spiralBoard {
-  max-width: min(calc(100vw - 400px), 800px);
-  max-height: 85vh;
-  height: min(calc(100vh - 120px), 85vh, 800px);
-  gap: 12px;
-  padding: 20px;
+/* Ajout d'un effet néon rouge sur le contour du board (spiralBoard) uniquement */
+@keyframes neonBoardRed {
+  0%, 100% {
+    box-shadow: 0 0 0 2px #ff1a1a, 0 0 16px 2px #ff1a1a, 0 0 32px 8px #ff1a1a55;
+    border-color: #ff1a1a;
+  }
+  50% {
+    box-shadow: 0 0 0 4px #ff4444, 0 0 32px 6px #ff4444, 0 0 64px 16px #ff444488;
+    border-color: #ff4444;
+  }
 }
 
-/* Optimisation pour écrans très larges avec chat */
+/* Optimisation pour écrans larges >= 1024px */
+@media (min-width: 1024px) {
+  /* Par défaut: board maximisé SANS chat */
+  .boardContainer:not(.withChat) .spiralBoard {
+    max-width: min(95vw, 1100px);
+    max-height: min(95vh, 1100px);
+    height: min(95vw, 95vh, 1100px);
+    gap: 20px;
+    padding: 40px;
+  }
+  
+  .boardContainer:not(.withChat) .boardSquare {
+    min-width: 70px;
+    min-height: 70px;
+    font-size: 1.6rem;
+  }
+  
+  .boardContainer:not(.withChat) .squareFront {
+    font-size: clamp(1.2rem, 2.8vw, 1.6rem);
+  }
+  
+  /* Board avec chat: plus compact mais toujours bien dimensionné */
+  .boardContainer.withChat .spiralBoard {
+    max-width: min(calc(100vw - 400px), 800px);
+    max-height: 85vh;
+    height: min(calc(100vh - 120px), 85vh, 800px);
+    gap: 12px;
+    padding: 20px;
+  }
+}
+
+/* Optimisation pour très grands écrans >= 1400px */
 @media (min-width: 1400px) {
   .boardContainer.withChat .spiralBoard {
     max-width: min(calc(100vw - 420px), 950px);
@@ -125,31 +265,14 @@
   }
 }
 
-/* Optimisation pour écrans larges quand le chat n'est PAS visible */
-@media (min-width: 1024px) {
-  .boardContainer:not(.withChat) .spiralBoard {
-    max-width: min(95vw, 1100px);
-    max-height: min(95vh, 1100px);
-    height: min(95vw, 95vh, 1100px);
-    gap: 20px;
-    padding: 40px;
-  }
-  
-  .boardContainer:not(.withChat) .boardSquare {
-    min-width: 70px;
-    min-height: 70px;
-    font-size: 1.6rem;
-  }
-  
-  .boardContainer:not(.withChat) .squareFront {
-    font-size: clamp(1.2rem, 2.8vw, 1.6rem);
-  }
-}
-
 /* === CASES DU PLATEAU === */
 .boardSquare {
-  background: #f8fafc;
-  border: 1px solid #cbd5e1;
+  background: #23272f;
+  background-image: 
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.03) 0 2px, transparent 2px 8px),
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0 1.5px, transparent 1.5px 7px);
+  background-blend-mode: lighten;
+  border: 1px solid #334155;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -161,6 +284,19 @@
   min-height: 60px;
   font-size: 1.4rem;
   aspect-ratio: 1;
+  box-shadow: 0 0 0 1.5px #ff3c00, 0 0 6px 1.5px #ff3c0033, 0 0 12px 2px #ff6d0022;
+  animation: neonBorderPulseRedSoft 2.5s linear infinite;
+}
+
+@keyframes neonBorderPulseRedSoft {
+  0%, 100% {
+    box-shadow: 0 0 0 1.5px #ff3c00, 0 0 6px 1.5px #ff3c0033, 0 0 12px 2px #ff6d0022;
+    border-color: #ff3c00;
+  }
+  50% {
+    box-shadow: 0 0 0 2.5px #ff6d00, 0 0 12px 2.5px #ff6d0033, 0 0 24px 4px #ff6d0022;
+    border-color: #ff6d00;
+  }
 }
 
 .boardContainer.withChat .boardSquare {
@@ -177,7 +313,7 @@
 .squareFront {
   font-size: clamp(1rem, 2.5vw, 1.4rem);
   font-weight: 600;
-  color: #334155;
+  color: #e0e7ef;
   background: none;
   border: none;
   width: 100%;
@@ -194,83 +330,83 @@
   border-radius: 6px;
 }
 
-/* === CASES SPÉCIALES AVEC DESIGN SIMPLE === */
+/* === CASES SPÉCIALES AVEC DESIGN SOMBRE === */
 
 /* Case oie - Couleur verte simple */
 .oieSquare {
-  background: #dcfce7;
+  background: #14532d;
   border-color: #22c55e;
 }
 
 .oieSquare .squareFront {
-  color: #15803d;
+  color: #bbf7d0;
 }
 
 /* Case pont - Couleur bleue simple */
 .pontSquare {
-  background: #dbeafe;
+  background: #1e293b;
   border-color: #3b82f6;
 }
 
 .pontSquare .squareFront {
-  color: #1d4ed8;
+  color: #60a5fa;
 }
 
 /* Case hôtel - Couleur violette simple */
 .hotelSquare {
-  background: #f3e8ff;
+  background: #312e81;
   border-color: #9333ea;
 }
 
 .hotelSquare .squareFront {
-  color: #7c3aed;
+  color: #c4b5fd;
 }
 
 /* Case puits - Couleur indigo simple */
 .puitsSquare {
-  background: #e0e7ff;
+  background: #3730a3;
   border-color: #6366f1;
 }
 
 .puitsSquare .squareFront {
-  color: #4f46e5;
+  color: #a5b4fc;
 }
 
 /* Case labyrinthe - Couleur orange simple */
 .labyrintheSquare {
-  background: #fed7aa;
+  background: #7c2d12;
   border-color: #f97316;
 }
 
 .labyrintheSquare .squareFront {
-  color: #ea580c;
+  color: #fdba74;
 }
 
 /* Case prison - Couleur grise simple */
 .prisonSquare {
-  background: #f1f5f9;
+  background: #334155;
   border-color: #6b7280;
 }
 
 .prisonSquare .squareFront {
-  color: #4b5563;
+  color: #cbd5e1;
 }
 
 /* Case mort - Couleur rouge/noire simple */
 .mortSquare {
-  background: #fef2f2;
+  background: #1e1b1b;
   border-color: #ef4444;
 }
 
 .mortSquare .squareFront {
-  color: #dc2626;
+  color: #fca5a5;
 }
 
 /* === CASE ACTIVE === */
 .hotSquare {
   border-color: #fbbf24 !important;
-  background: #fef3c7 !important;
-  box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+  background: #78350f !important;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.18);
   animation: subtleGlow 2s ease-in-out infinite alternate;
 }
 
@@ -495,8 +631,9 @@
   border: 1px solid #3b82f6;
 }
 
+/* Optimisation pour écrans moyens 901px-1023px */
 @media (max-width: 1023px) and (min-width: 901px) {
-  /* Écrans moyens - optimisation quand pas de chat */
+  /* Sans chat: board encore assez grand */
   .boardContainer:not(.withChat) .spiralBoard {
     max-width: min(90vw, 850px);
     max-height: min(90vh, 850px);
@@ -511,7 +648,7 @@
     font-size: 1.5rem;
   }
   
-  /* Écrans moyens - optimisation quand chat présent */
+  /* Avec chat: plus compact */
   .boardContainer.withChat .spiralBoard {
     max-width: min(calc(100vw - 380px), 600px);
     max-height: 80vh;
