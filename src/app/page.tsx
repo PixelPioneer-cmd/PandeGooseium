@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import Board from './components/Board';
-import Die from './components/Die';
+import Board3D from './components/Board3D';
 import PlayerList from './components/PlayerList';
 import QuestionModal from './components/QuestionModal';
 import { useWebSocket, Player } from '../hooks/useWebSocket';
@@ -13,6 +13,7 @@ export default function Home() {
   const [isMulti, setIsMulti] = useState<boolean>(false);
   const [localName, setLocalName] = useState<string>('');
   const [currentOpponent, setCurrentOpponent] = useState<Player | null>(null);
+  const [is3D, setIs3D] = useState<boolean>(false);
   
   // Utilisation des hooks personnalisés
   const {
@@ -71,45 +72,51 @@ export default function Home() {
       <div className="flex flex-col-reverse lg:flex-row gap-4">
         {/* Section principale du jeu */}
         <div className="lg:w-3/4 flex flex-col">
-          <div className="flex items-center mb-4">
-            <button
-              onClick={toggleMode}
-              className="mr-4 px-4 py-2 bg-gray-700 rounded hover:bg-gray-600 transition-colors"
-            >
-              Mode: {isMulti ? 'Multijoueur' : 'Solo'}
-            </button>
-            
-            {isMulti && (
-              <p className={`font-bold ${isMyTurn ? 'text-yellow-400 text-glow-yellow' : 'text-gray-400'}`}>
-                {isMyTurn 
-                  ? "C'est votre tour de jouer" 
-                  : `En attente du tour de ${connectedPlayers.find(p => p.id === currentTurnPlayerId)?.name || '...'}`
-                }
-              </p>
-            )}
-          </div>
-          
-          <h1 className="text-3xl mb-4 glow-text">L&#39;Oie des Enfers</h1>
-          
-          <Board 
-            localPlayer={isMulti ? localPlayer : { id: 'local', name: 'Vous', position, color: '#FFD700' }}
-            remotePlayer={
-              isMulti && currentOpponent 
-                ? connectedPlayers.find(p => p.id === currentOpponent.id) || null 
-                : null
-            }
-          />
-          
-          <div className="mt-4">
-            <Die 
-              onRoll={rollDie} 
-              lastRoll={lastRoll} 
-              disabled={modalOpen || position === 40 || (isMulti && !isMyTurn)} 
+          {is3D ? (
+            <Board3D 
+              localPlayer={isMulti ? localPlayer : { id: 'local', name: 'Vous', position, color: '#FFD700' }}
+              remotePlayers={
+                isMulti 
+                  ? connectedPlayers.filter(p => p.name !== localName)
+                  : []
+              }
+              onRoll={rollDie}
+              lastRoll={lastRoll}
+              disabled={modalOpen || position === 40 || (isMulti && !isMyTurn)}
+              isMulti={isMulti}
+              toggleMode={toggleMode}
+              is3D={is3D}
+              toggleView={() => setIs3D(!is3D)}
+              isMyTurn={isMyTurn}
+              currentTurnPlayerId={currentTurnPlayerId}
+              connectedPlayers={connectedPlayers}
+              feedback={feedback}
+              position={position}
+              showChat={isMulti}
             />
-          </div>
-          
-          {feedback && <p className="mt-2 text-yellow-300">{feedback}</p>}
-          {position === 40 && <p className="mt-4 text-2xl text-green-400">Vous avez gagné ! 🎉</p>}
+          ) : (
+            <Board 
+              localPlayer={isMulti ? localPlayer : { id: 'local', name: 'Vous', position, color: '#FFD700' }}
+              remotePlayers={
+                isMulti 
+                  ? connectedPlayers.filter(p => p.name !== localName)
+                  : []
+              }
+              onRoll={rollDie}
+              lastRoll={lastRoll}
+              disabled={modalOpen || position === 40 || (isMulti && !isMyTurn)}
+              isMulti={isMulti}
+              toggleMode={toggleMode}
+              is3D={is3D}
+              toggleView={() => setIs3D(!is3D)}
+              isMyTurn={isMyTurn}
+              currentTurnPlayerId={currentTurnPlayerId}
+              connectedPlayers={connectedPlayers}
+              feedback={feedback}
+              position={position}
+              showChat={isMulti}
+            />
+          )}
         </div>
         
         {/* Liste des joueurs et chat (sur le côté en desktop, en bas en mobile) */}

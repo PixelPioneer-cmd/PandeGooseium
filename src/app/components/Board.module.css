@@ -1,54 +1,197 @@
-@keyframes float {
-  0% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-5px) rotate(2deg); }
-  100% { transform: translateY(0px) rotate(0deg); }
-}
+/* === STYLES POUR MODE 3D UNIQUEMENT === */
 
-@keyframes flicker {
-  0% { opacity: 0.4; }
-  25% { opacity: 0.5; }
-  50% { opacity: 0.6; }
-  75% { opacity: 0.5; }
-  100% { opacity: 0.4; }
-}
-
-@keyframes move {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.2); }
-  100% { transform: scale(1); }
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 0.7; }
-  50% { transform: scale(1.05); opacity: 0.9; }
-  100% { transform: scale(1); opacity: 0.7; }
-}
-
-.floatingGoose {
-  animation: float 3s ease-in-out infinite;
-}
-
-.gooseSquare {
-  animation: pulse 2.5s ease-in-out infinite;
-}
-
-.flame {
-  animation: flicker 2s ease-in-out infinite;
-}
-
-.moveAnimation {
-  animation: move 0.5s ease-in-out;
-}
-
-.hotSquare {
+/* Container 3D full screen */
+.board3DContainer {
+  width: 100%;
+  height: calc(100vh - 4rem);
   position: relative;
-  overflow: hidden;
+  background: #1a1a1a;
 }
 
-.hotSquare::before {
-  content: '';
+/* === CONTRÔLES === */
+.controlsBar {
   position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at center, rgba(255, 100, 50, 0.2) 0%, transparent 70%);
-  z-index: 5;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(145deg, 
+    rgba(26, 26, 46, 0.95) 0%,
+    rgba(52, 52, 90, 0.9) 50%,
+    rgba(74, 74, 128, 0.85) 100%
+  );
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 16px;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 2px 10px rgba(255, 215, 0, 0.2),
+    inset 0 2px 5px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.gameTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #FFD700;
+  text-shadow: 
+    0 0 10px rgba(255, 215, 0, 0.8),
+    0 2px 4px rgba(0, 0, 0, 0.5);
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.turnStatus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0.5rem;
+}
+
+.turnIndicator {
+  padding: 0.3rem 0.8rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.myTurn {
+  background: linear-gradient(145deg, 
+    rgba(34, 197, 94, 0.9) 0%,
+    rgba(16, 185, 129, 0.85) 100%
+  );
+  color: #ffffff;
+  border: 1px solid rgba(34, 197, 94, 0.8);
+  box-shadow: 0 0 15px rgba(34, 197, 94, 0.4);
+}
+
+.waitingTurn {
+  background: linear-gradient(145deg, 
+    rgba(251, 191, 36, 0.9) 0%,
+    rgba(245, 158, 11, 0.85) 100%
+  );
+  color: #1a1a1a;
+  border: 1px solid rgba(251, 191, 36, 0.8);
+  box-shadow: 0 0 15px rgba(251, 191, 36, 0.3);
+}
+
+.controlButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  background: linear-gradient(145deg, 
+    rgba(51, 65, 85, 0.9) 0%,
+    rgba(30, 41, 59, 0.85) 100%
+  );
+  color: #e2e8f0;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.controlButton:hover {
+  background: linear-gradient(145deg, 
+    rgba(71, 85, 105, 0.9) 0%,
+    rgba(51, 65, 85, 0.85) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.rollButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(255, 215, 0, 0.5);
+  border-radius: 8px;
+  background: linear-gradient(145deg, 
+    rgba(255, 215, 0, 0.95) 0%,
+    rgba(255, 193, 7, 0.9) 50%,
+    rgba(255, 152, 0, 0.85) 100%
+  );
+  color: #1a1a1a;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 
+    0 4px 15px rgba(255, 215, 0, 0.3),
+    inset 0 1px 3px rgba(255, 255, 255, 0.3);
+}
+
+.rollButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 
+    0 6px 20px rgba(255, 215, 0, 0.4),
+    inset 0 1px 3px rgba(255, 255, 255, 0.4);
+}
+
+.rollButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* === FEEDBACK === */
+.feedbackOverlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  padding: 1rem 2rem;
+  border-radius: 12px;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.3),
+    0 2px 10px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.feedbackMessage {
+  margin: 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.feedbackIcon {
+  font-size: 1.2em;
+}
+
+.success {
+  background: linear-gradient(145deg, 
+    rgba(34, 197, 94, 0.95) 0%,
+    rgba(16, 185, 129, 0.9) 100%
+  );
+  color: #ffffff;
+  border: 1px solid rgba(34, 197, 94, 0.8);
+}
+
+.error {
+  background: linear-gradient(145deg, 
+    rgba(239, 68, 68, 0.95) 0%,
+    rgba(220, 38, 38, 0.9) 100%
+  );
+  color: #ffffff;
+  border: 1px solid rgba(239, 68, 68, 0.8);
+}
+
+.info {
+  background: linear-gradient(145deg, 
+    rgba(59, 130, 246, 0.95) 0%,
+    rgba(37, 99, 235, 0.9) 100%
+  );
+  color: #ffffff;
+  border: 1px solid rgba(59, 130, 246, 0.8);
 }

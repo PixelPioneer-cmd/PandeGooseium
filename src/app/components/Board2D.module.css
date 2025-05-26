@@ -1,0 +1,749 @@
+/* === PANDEMONIUM BOARD - INFERNAL 2D THEME (DARKER PALETTE) === */
+
+/* Animations des enfers */
+@keyframes hellishGlow {
+  0% { 
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.4), inset 0 0 25px rgba(139, 69, 19, 0.3);
+    transform: scale(1);
+    filter: brightness(1) saturate(1.2);
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(239, 68, 68, 0.7), inset 0 0 35px rgba(185, 28, 28, 0.5);
+    transform: scale(1.03);
+    filter: brightness(1.2) saturate(1.5);
+  }
+  100% { 
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.4), inset 0 0 25px rgba(139, 69, 19, 0.3);
+    transform: scale(1);
+    filter: brightness(1) saturate(1.2);
+  }
+}
+
+@keyframes emberFloat {
+  0% { 
+    opacity: 0.5; 
+    transform: translateY(0px) rotate(0deg) scale(1);
+    filter: brightness(0.8) hue-rotate(0deg);
+  }
+  33% { 
+    opacity: 0.9; 
+    transform: translateY(-8px) rotate(120deg) scale(1.1);
+    filter: brightness(1.3) hue-rotate(15deg);
+  }
+  66% { 
+    opacity: 0.7; 
+    transform: translateY(-4px) rotate(240deg) scale(0.95);
+    filter: brightness(1.1) hue-rotate(-10deg);
+  }
+  100% { 
+    opacity: 0.5; 
+    transform: translateY(0px) rotate(360deg) scale(1);
+    filter: brightness(0.8) hue-rotate(0deg);
+  }
+}
+
+@keyframes fadeInFromHell {
+  0% { 
+    opacity: 0; 
+    transform: translateY(30px) scale(0.7) rotateX(45deg);
+    filter: blur(8px) brightness(2);
+  }
+  50% {
+    opacity: 0.8;
+    transform: translateY(10px) scale(0.9) rotateX(20deg);
+    filter: blur(2px) brightness(1.5);
+  }
+  100% { 
+    opacity: 1; 
+    transform: translateY(0) scale(1) rotateX(0deg);
+    filter: blur(0px) brightness(1);
+  }
+}
+
+@keyframes smokeWave {
+  0% { 
+    background-position: 0% 50%, 100% 50%;
+    filter: hue-rotate(0deg) saturate(1);
+    opacity: 0.7;
+  }
+  25% {
+    background-position: 25% 25%, 75% 75%;
+    filter: hue-rotate(10deg) saturate(1.2);
+    opacity: 0.9;
+  }
+  50% { 
+    background-position: 100% 0%, 0% 100%;
+    filter: hue-rotate(20deg) saturate(1.4);
+    opacity: 1;
+  }
+  75% {
+    background-position: 75% 75%, 25% 25%;
+    filter: hue-rotate(10deg) saturate(1.2);
+    opacity: 0.9;
+  }
+  100% { 
+    background-position: 0% 50%, 100% 50%;
+    filter: hue-rotate(0deg) saturate(1);
+    opacity: 0.7;
+  }
+}
+
+@keyframes infernalPulse {
+  0% { 
+    border-color: #dc2626;
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.4), inset 0 0 10px rgba(139, 69, 19, 0.2);
+    transform: scale(1);
+  }
+  50% { 
+    border-color: #f97316;
+    box-shadow: 0 0 30px rgba(249, 115, 22, 0.8), inset 0 0 20px rgba(185, 28, 28, 0.4);
+    transform: scale(1.05);
+  }
+  100% { 
+    border-color: #dc2626;
+    box-shadow: 0 0 15px rgba(220, 38, 38, 0.4), inset 0 0 10px rgba(139, 69, 19, 0.2);
+    transform: scale(1);
+  }
+}
+
+@keyframes shadowFlicker {
+  0%, 100% { 
+    text-shadow: 0 0 5px rgba(220, 38, 38, 0.5), 0 0 10px rgba(139, 69, 19, 0.3);
+  }
+  50% { 
+    text-shadow: 0 0 10px rgba(239, 68, 68, 0.8), 0 0 20px rgba(185, 28, 28, 0.5);
+  }
+}
+
+/* === CONTENEUR INFERNAL === */
+.boardContainer {
+  padding: 20px;
+  overflow: visible;
+  background: none !important;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  transition: all 0.4s ease;
+  animation: none;
+}
+
+/* Variante avec chat - atmosphère adaptée */
+.boardContainer.withChat {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  background: none !important;
+  min-height: 100vh;
+  transition: none;
+  animation: none;
+}
+
+.board2DWrapper {
+  flex: 1 1 0%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 100vh;
+  padding: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.chatPanel {
+  width: 360px;
+  min-width: 320px;
+  max-width: 400px;
+  height: 100vh;
+  background: #181e2a;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #222b3a;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.08);
+  z-index: 20;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* === GRILLE SPIRALE === */
+.spiralBoard {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+  gap: 18px;
+  width: 100%;
+  height: min(95vw, 90vh, 900px);
+  max-width: min(95vw, 900px);
+  max-height: 90vh;
+  position: relative;
+  
+  border: 2px solid #23272f;
+  border-radius: 16px;
+  padding: 32px;
+  
+  background: transparent;
+  box-shadow: 0 0 0 2px #ff1a1a, 0 0 16px 2px #ff1a1a, 0 0 32px 8px #ff1a1a55;
+  animation: neonBoardRed 2.5s linear infinite;
+}
+
+/* Ajout d'un effet néon rouge sur le contour du board (spiralBoard) uniquement */
+@keyframes neonBoardRed {
+  0%, 100% {
+    box-shadow: 0 0 0 2px #ff1a1a, 0 0 16px 2px #ff1a1a, 0 0 32px 8px #ff1a1a55;
+    border-color: #ff1a1a;
+  }
+  50% {
+    box-shadow: 0 0 0 4px #ff4444, 0 0 32px 6px #ff4444, 0 0 64px 16px #ff444488;
+    border-color: #ff4444;
+  }
+}
+
+/* Optimisation pour écrans larges >= 1024px */
+@media (min-width: 1024px) {
+  /* Par défaut: board maximisé SANS chat */
+  .boardContainer:not(.withChat) .spiralBoard {
+    max-width: min(95vw, 1100px);
+    max-height: min(95vh, 1100px);
+    height: min(95vw, 95vh, 1100px);
+    gap: 20px;
+    padding: 40px;
+  }
+  
+  .boardContainer:not(.withChat) .boardSquare {
+    min-width: 70px;
+    min-height: 70px;
+    font-size: 1.6rem;
+  }
+  
+  .boardContainer:not(.withChat) .squareFront {
+    font-size: clamp(1.2rem, 2.8vw, 1.6rem);
+  }
+  
+  /* Board avec chat: plus compact mais toujours bien dimensionné */
+  .boardContainer.withChat .spiralBoard {
+    max-width: min(calc(100vw - 400px), 800px);
+    max-height: 85vh;
+    height: min(calc(100vh - 120px), 85vh, 800px);
+    gap: 12px;
+    padding: 20px;
+  }
+}
+
+/* Optimisation pour très grands écrans >= 1400px */
+@media (min-width: 1400px) {
+  .boardContainer.withChat .spiralBoard {
+    max-width: min(calc(100vw - 420px), 950px);
+    max-height: 90vh;
+    height: min(calc(100vh - 100px), 90vh, 950px);
+    gap: 16px;
+    padding: 28px;
+  }
+  
+  .boardContainer.withChat .boardSquare {
+    min-width: 50px;
+    min-height: 50px;
+    font-size: 1.2rem;
+  }
+  
+  .boardContainer.withChat .squareFront {
+    font-size: clamp(1rem, 1.8vw, 1.2rem);
+  }
+}
+
+/* === CASES DU PLATEAU === */
+.boardSquare {
+  background: #23272f;
+  background-image: 
+    repeating-linear-gradient(135deg, rgba(255,255,255,0.03) 0 2px, transparent 2px 8px),
+    repeating-linear-gradient(45deg, rgba(255,255,255,0.02) 0 1.5px, transparent 1.5px 7px);
+  background-blend-mode: lighten;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+  cursor: pointer;
+  min-width: 60px;
+  min-height: 60px;
+  font-size: 1.4rem;
+  aspect-ratio: 1;
+  box-shadow: 0 0 0 1.5px #ff3c00, 0 0 6px 1.5px #ff3c0033, 0 0 12px 2px #ff6d0022,
+    0 4px 0 0 #1a1a1a33,
+    0 8px 12px 0 #00000044,
+    0 1.5px 0 0 #ff3c0022,
+    0 10px 16px -4px #00000055;
+}
+
+.boardSquare::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -7px; top: 90%;
+  border-radius: 0 0 8px 8px;
+  background: linear-gradient(180deg, rgba(40,20,10,0.18) 0%, rgba(0,0,0,0.32) 100%);
+  filter: blur(1.5px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+@keyframes neonBorderPulseRedSoft {
+  0%, 100% {
+    box-shadow: 0 0 0 1.5px #ff3c00, 0 0 6px 1.5px #ff3c0033, 0 0 12px 2px #ff6d0022;
+    border-color: #ff3c00;
+  }
+  50% {
+    box-shadow: 0 0 0 2.5px #ff6d00, 0 0 12px 2.5px #ff6d0033, 0 0 24px 4px #ff6d0022;
+    border-color: #ff6d00;
+  }
+}
+
+.boardContainer.withChat .boardSquare {
+  min-width: 40px;
+  min-height: 40px;
+  font-size: 1rem;
+}
+
+.boardSquare:hover {
+  transform: scale(1.02);
+  border-color: #64748b;
+}
+
+.squareFront {
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  font-weight: 600;
+  color: #e0e7ef;
+  background: none;
+  border: none;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  position: relative;
+}
+
+.boardContainer.withChat .squareFront {
+  font-size: clamp(0.8rem, 1.5vw, 1rem);
+  border-radius: 6px;
+}
+
+/* === CASES SPÉCIALES AVEC DESIGN SOMBRE === */
+
+/* Case oie - Couleur verte simple */
+.oieSquare {
+  background: #14532d;
+  border-color: #22c55e;
+}
+
+.oieSquare .squareFront {
+  color: #bbf7d0;
+}
+
+/* Case pont - Couleur bleue simple */
+.pontSquare {
+  background: #1e293b;
+  border-color: #3b82f6;
+}
+
+.pontSquare .squareFront {
+  color: #60a5fa;
+}
+
+/* Case hôtel - Couleur violette simple */
+.hotelSquare {
+  background: #312e81;
+  border-color: #9333ea;
+}
+
+.hotelSquare .squareFront {
+  color: #c4b5fd;
+}
+
+/* Case puits - Couleur indigo simple */
+.puitsSquare {
+  background: #3730a3;
+  border-color: #6366f1;
+}
+
+.puitsSquare .squareFront {
+  color: #a5b4fc;
+}
+
+/* Case labyrinthe - Couleur orange simple */
+.labyrintheSquare {
+  background: #7c2d12;
+  border-color: #f97316;
+}
+
+.labyrintheSquare .squareFront {
+  color: #fdba74;
+}
+
+/* Case prison - Couleur grise simple */
+.prisonSquare {
+  background: #334155;
+  border-color: #6b7280;
+}
+
+.prisonSquare .squareFront {
+  color: #cbd5e1;
+}
+
+/* Case mort - Couleur rouge/noire simple */
+.mortSquare {
+  background: #1e1b1b;
+  border-color: #ef4444;
+}
+
+.mortSquare .squareFront {
+  color: #fca5a5;
+}
+
+/* === CASE ACTIVE === */
+.hotSquare {
+  border-color: #fbbf24 !important;
+  background: #78350f !important;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.18);
+  animation: subtleGlow 2s ease-in-out infinite alternate;
+}
+
+/* === PIÈCES DE JEU SIMPLIFIÉES === */
+.gamePiece {
+  width: clamp(22px, 5vw, 36px);
+  height: clamp(22px, 5vw, 36px);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: calc(clamp(22px, 5vw, 36px) / -2);
+  margin-top: calc(clamp(22px, 5vw, 36px) / -2);
+  z-index: 10;
+  pointer-events: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: clamp(12px, 3vw, 18px);
+  color: white;
+}
+
+/* Pièces plus grandes sur grands écrans sans chat */
+@media (min-width: 1024px) {
+  .boardContainer:not(.withChat) .gamePiece {
+    width: clamp(28px, 4vw, 44px);
+    height: clamp(28px, 4vw, 44px);
+    margin-left: calc(clamp(28px, 4vw, 44px) / -2);
+    margin-top: calc(clamp(28px, 4vw, 44px) / -2);
+    font-size: clamp(14px, 2.5vw, 22px);
+  }
+}
+
+.gamePiece {
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.boardContainer.withChat .gamePiece {
+  width: clamp(16px, 3vw, 24px);
+  height: clamp(16px, 3vw, 24px);
+  margin-left: calc(clamp(16px, 3vw, 24px) / -2);
+  margin-top: calc(clamp(16px, 3vw, 24px) / -2);
+  font-size: clamp(9px, 2vw, 12px);
+}
+
+/* Pièces plus grandes sur grands écrans même avec chat */
+@media (min-width: 1400px) {
+  .boardContainer.withChat .gamePiece {
+    width: clamp(20px, 2.5vw, 28px);
+    height: clamp(20px, 2.5vw, 28px);
+    margin-left: calc(clamp(20px, 2.5vw, 28px) / -2);
+    margin-top: calc(clamp(20px, 2.5vw, 28px) / -2);
+    font-size: clamp(11px, 1.8vw, 16px);
+  }
+}
+
+.localTower {
+  background: #fbbf24;
+  border-color: #f59e0b;
+}
+
+.remoteTower {
+  background: #3b82f6;
+  border-color: #2563eb;
+}
+
+/* === CONTRÔLES SIMPLIFIÉS === */
+.controlsBar {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.boardContainer.withChat .controlsBar {
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.boardContainer.withChat .gameTitle {
+  font-size: 1.2rem;
+}
+
+.gameTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.turnStatus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0.5rem;
+}
+
+.turnIndicator {
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.myTurn {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #22c55e;
+}
+
+.waitingTurn {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
+.controlButton, .rollButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  color: #334155;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.controlButton:hover, .rollButton:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.rollButton {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.rollButton:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.rollButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* === ICÔNES SPÉCIALES === */
+.specialIcon {
+  margin-left: 4px;
+  font-size: 0.8em;
+}
+
+/* Icônes plus grandes sur grands écrans sans chat */
+@media (min-width: 1024px) {
+  .boardContainer:not(.withChat) .specialIcon {
+    font-size: 1.2em;
+    margin-left: 6px;
+  }
+}
+
+/* === FEEDBACK === */
+.feedbackOverlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.3s ease;
+}
+
+.feedbackMessage {
+  margin: 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.feedbackIcon {
+  font-size: 1.2em;
+}
+
+.success {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #22c55e;
+}
+
+.error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #ef4444;
+}
+
+.info {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border: 1px solid #3b82f6;
+}
+
+/* Optimisation pour écrans moyens 901px-1023px */
+@media (max-width: 1023px) and (min-width: 901px) {
+  /* Sans chat: board encore assez grand */
+  .boardContainer:not(.withChat) .spiralBoard {
+    max-width: min(90vw, 850px);
+    max-height: min(90vh, 850px);
+    height: min(90vw, 90vh, 850px);
+    gap: 16px;
+    padding: 28px;
+  }
+  
+  .boardContainer:not(.withChat) .boardSquare {
+    min-width: 65px;
+    min-height: 65px;
+    font-size: 1.5rem;
+  }
+  
+  /* Avec chat: plus compact */
+  .boardContainer.withChat .spiralBoard {
+    max-width: min(calc(100vw - 380px), 600px);
+    max-height: 80vh;
+    height: min(calc(100vh - 140px), 80vh, 600px);
+    gap: 10px;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 900px) {
+  .spiralBoard {
+    gap: 12px;
+    padding: 16px;
+    max-width: 95%;
+  }
+  .boardContainer.withChat {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .chatPanel {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 320px;
+    min-height: 200px;
+    border-left: none;
+    border-top: 1px solid #222b3a;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+    position: static;
+    order: 2;
+  }
+  .board2DWrapper {
+    min-height: 0;
+    padding: 8px;
+    order: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .spiralBoard {
+    gap: 8px;
+    padding: 12px;
+  }
+  .boardContainer.withChat .spiralBoard {
+    gap: 4px;
+    padding: 6px;
+  }
+  .boardSquare {
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 1rem;
+  }
+  .boardContainer.withChat .boardSquare {
+    min-width: 28px;
+    min-height: 28px;
+    font-size: 0.8rem;
+  }
+}
+
+.pieceLabel {
+  display: block;
+  font-size: 1.05rem;
+  font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.06em;
+  text-shadow:
+    0 0 8px #ff4d4d,
+    0 0 2px #fff,
+    0 2px 8px #000,
+    0 0 1px #ff4d4d,
+    0 0 16px #ff4d4d;
+  padding: 0.08em 0.5em;
+  border-radius: 0.5em;
+  background: rgba(30, 0, 0, 0.72);
+  border: 1.5px solid #ff4d4d;
+  box-shadow: 0 0 8px 2px #ff4d4d44, 0 1px 8px 0 #000a;
+  margin-bottom: 0.1rem;
+  margin-top: -0.18rem;
+  filter: brightness(1.25) contrast(1.2);
+  pointer-events: none;
+  user-select: none;
+  transition: background 0.2s, color 0.2s;
+}

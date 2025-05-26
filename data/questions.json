@@ -38,5 +38,8 @@
   "37": { "question": "Quel fleuve des Enfers est alimenté par les larmes de ceux qui se sont condamnés ?", "answer": "Cocytus", "level": "difficile" },
   "38": { "question": "Décris les tribulations des héros pour atteindre l’Hadès.", "answer": "Franchir le Styx, affronter Cerbère, se présenter aux juges", "level": "difficile" },
   "39": { "question": "Qui sont les 100 monstres envoyés pour détruire l’ordre ?", "answer": "Géants", "level": "difficile" },
-  "40": { "question": "Qui arrive à l’Hadès et n’en part plus jamais ?", "answer": "Tityos", "level": "difficile" }
+  "40": { "question": "Qui arrive à l’Hadès et n’en part plus jamais ?", "answer": "Tityos", "level": "difficile" },
+  "41": { "question": "Quel est le nom du fleuve des Enfers qui est le fleuve de l’oubli ?", "answer": "Léthé", "level": "difficile" },
+  "42": { "question": "Quel est le nom du fleuve des Enfers qui est le fleuve de la douleur ?", "answer": "Cocytus", "level": "difficile" },
+  "43": { "question": "Quel est le nom du fleuve des Enfers qui est le fleuve de feu ?", "answer": "Phlégéthon", "level": "difficile" }
 }

@@ -113,3 +113,19 @@ body {
   pointer-events: none;
   z-index: 10;
 }
+
+/* Effet lors du lancement du dé */
+@keyframes diceRollingEffect {
+  0% { background: radial-gradient(circle at center, #2b0000, #000000); }
+  50% { background: radial-gradient(circle at center, #3b0000, #0a0000); }
+  100% { background: radial-gradient(circle at center, #2b0000, #000000); }
+}
+
+.dice-rolling {
+  animation: diceRollingEffect 0.5s ease-in-out infinite;
+}
+
+/* Amélioration des effets de brillance pour le dé */
+.dice-glow {
+  filter: drop-shadow(0 0 15px rgba(255, 204, 0, 0.8));
+}
