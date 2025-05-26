@@ -284,8 +284,22 @@
   min-height: 60px;
   font-size: 1.4rem;
   aspect-ratio: 1;
-  box-shadow: 0 0 0 1.5px #ff3c00, 0 0 6px 1.5px #ff3c0033, 0 0 12px 2px #ff6d0022;
-  animation: neonBorderPulseRedSoft 2.5s linear infinite;
+  box-shadow: 0 0 0 1.5px #ff3c00, 0 0 6px 1.5px #ff3c0033, 0 0 12px 2px #ff6d0022,
+    0 4px 0 0 #1a1a1a33,
+    0 8px 12px 0 #00000044,
+    0 1.5px 0 0 #ff3c0022,
+    0 10px 16px -4px #00000055;
+}
+
+.boardSquare::after {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: -7px; top: 90%;
+  border-radius: 0 0 8px 8px;
+  background: linear-gradient(180deg, rgba(40,20,10,0.18) 0%, rgba(0,0,0,0.32) 100%);
+  filter: blur(1.5px);
+  z-index: 0;
+  pointer-events: none;
 }
 
 @keyframes neonBorderPulseRedSoft {
@@ -706,4 +720,30 @@
     min-height: 28px;
     font-size: 0.8rem;
   }
+}
+
+.pieceLabel {
+  display: block;
+  font-size: 1.05rem;
+  font-family: 'Montserrat', 'Segoe UI', Arial, sans-serif;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.06em;
+  text-shadow:
+    0 0 8px #ff4d4d,
+    0 0 2px #fff,
+    0 2px 8px #000,
+    0 0 1px #ff4d4d,
+    0 0 16px #ff4d4d;
+  padding: 0.08em 0.5em;
+  border-radius: 0.5em;
+  background: rgba(30, 0, 0, 0.72);
+  border: 1.5px solid #ff4d4d;
+  box-shadow: 0 0 8px 2px #ff4d4d44, 0 1px 8px 0 #000a;
+  margin-bottom: 0.1rem;
+  margin-top: -0.18rem;
+  filter: brightness(1.25) contrast(1.2);
+  pointer-events: none;
+  user-select: none;
+  transition: background 0.2s, color 0.2s;
 }

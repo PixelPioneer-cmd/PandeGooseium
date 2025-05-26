@@ -310,22 +310,73 @@ export default function Board({ localPlayer, remotePlayers, onRoll, lastRoll, di
                           marginLeft: remotePlayersHere.length > 0 ? '-0.5rem' : undefined 
                         }}
                       >
-                        J1
+                        {isMulti && connectedPlayers && localPlayer?.id ? (
+                          (() => {
+                            const playerName = (() => {
+                              const player = connectedPlayers.find(p => p.id === localPlayer.id);
+                              if (player && player.name) {
+                                return player.name.length > 10 ? player.name.slice(0, 3) + '[...]' : player.name;
+                              }
+                              return 'J1';
+                            })();
+                            return (
+                              <span
+                                className={styles2D.pieceLabel}
+                                style={{
+                                  borderColor: localPlayer.color,
+                                  boxShadow: `0 0 8px 2px ${localPlayer.color}66, 0 1px 8px 0 #000a`,
+                                  textShadow: `0 0 8px ${localPlayer.color}, 0 0 2px #fff, 0 2px 8px #000, 0 0 1px ${localPlayer.color}, 0 0 16px ${localPlayer.color}`
+                                }}
+                              >
+                                {playerName}
+                              </span>
+                            );
+                          })()
+                        ) : 'J1'}
                       </div>
                     )}
 
                     {/* Remote players pieces */}
                     {remotePlayersHere.map((player, idx) => (
-                      <div 
-                        key={player.id}
-                        className={`${styles2D.gamePiece} ${styles2D.remoteTower}`}
-                        style={{ 
-                          marginLeft: `${0.5 + idx * 0.3}rem`,
-                          marginTop: `${-1 - idx * 0.1}rem`
-                        }}
-                      >
-                        J{idx + 2}
-                      </div>
+                      (() => {
+                        // Correction couleur : utilise player.color, sinon cherche dans connectedPlayers
+                        let color = player.color;
+                        if (!color && connectedPlayers) {
+                          const found = connectedPlayers.find(p => p.id === player.id);
+                          if (found && found.color) color = found.color;
+                        }
+                        if (!color) color = `hsl(${(idx+1)*60},70%,50%)`;
+                        const label = (() => {
+                          const p = connectedPlayers?.find(p => p.id === player.id);
+                          if (p && p.name) {
+                            return p.name.length > 10 ? p.name.slice(0, 3) + '[...]' : p.name;
+                          }
+                          return `J${idx + 2}`;
+                        })();
+                        return (
+                          <div 
+                            key={player.id}
+                            className={`${styles2D.gamePiece} ${styles2D.remoteTower}`}
+                            style={{ 
+                              marginLeft: `${0.5 + idx * 0.6}rem`,
+                              marginTop: `${-1 - idx * 0.1}rem`
+                            }}
+                          >
+                            {isMulti && connectedPlayers ? (
+                              <span
+                                className={styles2D.pieceLabel}
+                                style={{
+                                  borderColor: color,
+                                  boxShadow: `0 0 8px 2px ${color}66, 0 1px 8px 0 #000a`,
+                                  textShadow: `0 0 8px ${color}, 0 0 2px #fff, 0 2px 8px #000, 0 0 1px ${color}, 0 0 16px ${color}`
+                                }}
+                              >
+                                {label}
+                              </span>
+                            ) : label}
+                          </div>
+                        );
+                      })()
                     ))}
                   </div>
                 );
