@@ -357,6 +357,7 @@ interface BoardProps {
   connectedPlayers?: Player[];
   feedback?: string;
   position?: number;
+  showChat?: boolean;
 }
 
 export default function Board3D({ localPlayer, remotePlayers, onRoll, lastRoll, disabled, isMulti, toggleMode, is3D, toggleView, isMyTurn, currentTurnPlayerId, connectedPlayers, feedback, position }: BoardProps) {

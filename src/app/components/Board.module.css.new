@@ -1,0 +1,825 @@
+/* === STYLES SIMPLIFIÉS ET MODERNES POUR LE PLATEAU === */
+
+/* Animations simples et douces */
+@keyframes simpleGlow {
+  0% { 
+    opacity: 0.6; 
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.4);
+  }
+  100% { 
+    opacity: 1; 
+    box-shadow: 0 0 16px rgba(255, 215, 0, 0.6);
+  }
+}
+
+@keyframes pulseGreen {
+  0% { 
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+    transform: scale(1);
+  }
+  50% { 
+    box-shadow: 0 0 0 10px rgba(34, 197, 94, 0);
+    transform: scale(1.02);
+  }
+  100% { 
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+    transform: scale(1);
+  }
+}
+
+@keyframes feedbackSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px) scale(0.9);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+@keyframes feedbackSlideOut {
+  0% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-20px) scale(0.9);
+  }
+}
+
+/* === CONTENEUR PRINCIPAL === */
+.boardContainer {
+  perspective: 2000px;
+  perspective-origin: center 40%;
+  transform-style: preserve-3d;
+  padding: 40px 20px 120px;
+  overflow: visible;
+  background: radial-gradient(ellipse at center, 
+    rgba(15, 23, 42, 0.95) 0%,
+    rgba(30, 41, 59, 0.98) 50%,
+    rgba(0, 0, 0, 1) 100%
+  );
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* Container 3D full screen */
+.board3DContainer {
+  width: 100%;
+  height: calc(100vh - 4rem);
+  position: relative;
+  background: #1a1a1a;
+}
+
+/* === PLATEAU PRINCIPAL === */
+.boardGrid {
+  transform-style: preserve-3d;
+  transform-origin: center center;
+  position: relative;
+  z-index: 10;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.5));
+}
+
+.boardGrid:hover {
+  transition: transform 0.3s ease;
+}
+
+/* === GRILLE SPIRALE === */
+.spiralBoard {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+  gap: clamp(6px, 1vw, 16px);
+  width: clamp(360px, 85vw, 800px);
+  height: clamp(360px, 85vw, 800px);
+  max-width: 95vw;
+  max-height: 95vw;
+  transform-style: preserve-3d;
+  position: relative;
+  
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: clamp(8px, 1.5vw, 20px);
+  
+  background: linear-gradient(145deg, 
+    rgba(15, 23, 42, 0.9) 0%,
+    rgba(30, 41, 59, 0.95) 50%,
+    rgba(15, 23, 42, 0.9) 100%
+  );
+  
+  box-shadow: 
+    inset 0 0 50px rgba(0, 0, 0, 0.5),
+    0 0 100px rgba(255, 255, 255, 0.05);
+}
+
+/* === CASES DU PLATEAU === */
+.boardSquare {
+  background: rgba(24, 28, 36, 0.8);
+  border: 2px solid #09f;
+  box-shadow: 0 0 8px rgba(0, 153, 255, 0.3);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.boardSquare:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 16px rgba(0, 153, 255, 0.5);
+  z-index: 2;
+}
+
+.squareFront {
+  font-size: clamp(1rem, 2vw, 1.3rem);
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 8px #09f, 0 0 2px #fff;
+  pointer-events: none;
+  z-index: 1;
+  background: none;
+  border: none;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+/* Masquer les faces 3D pour le mode 2D */
+.squareSide, .squareBottom {
+  display: none;
+}
+
+/* === CASES SPÉCIALES AVEC DESIGN PLAT === */
+
+/* Case oie - Design plat moderne vert néon */
+.oieSquare .squareFront {
+  background: rgba(34, 197, 94, 0.15);
+  border: 2px solid #22c55e;
+  box-shadow: 0 0 8px rgba(34, 197, 94, 0.3);
+}
+
+.oieSquare:hover .squareFront {
+  background: rgba(34, 197, 94, 0.25);
+  box-shadow: 0 0 12px rgba(34, 197, 94, 0.5);
+}
+
+/* Case pont - Design plat moderne bleu néon */
+.pontSquare .squareFront {
+  background: rgba(59, 130, 246, 0.15);
+  border: 2px solid #3b82f6;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.3);
+}
+
+.pontSquare:hover .squareFront {
+  background: rgba(59, 130, 246, 0.25);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
+}
+
+/* Case hôtel - Design plat moderne violet néon */
+.hotelSquare .squareFront {
+  background: rgba(147, 51, 234, 0.15);
+  border: 2px solid #9333ea;
+  box-shadow: 0 0 8px rgba(147, 51, 234, 0.3);
+}
+
+.hotelSquare:hover .squareFront {
+  background: rgba(147, 51, 234, 0.25);
+  box-shadow: 0 0 12px rgba(147, 51, 234, 0.5);
+}
+
+/* Case puits - Design plat moderne indigo néon */
+.puitsSquare .squareFront {
+  background: rgba(99, 102, 241, 0.15);
+  border: 2px solid #6366f1;
+  box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
+}
+
+.puitsSquare:hover .squareFront {
+  background: rgba(99, 102, 241, 0.25);
+  box-shadow: 0 0 12px rgba(99, 102, 241, 0.5);
+}
+
+/* Case labyrinthe - Design plat moderne orange néon */
+.labyrintheSquare .squareFront {
+  background: rgba(249, 115, 22, 0.15);
+  border: 2px solid #f97316;
+  box-shadow: 0 0 8px rgba(249, 115, 22, 0.3);
+}
+
+.labyrintheSquare:hover .squareFront {
+  background: rgba(249, 115, 22, 0.25);
+  box-shadow: 0 0 12px rgba(249, 115, 22, 0.5);
+}
+
+/* Case prison - Design plat moderne gris néon */
+.prisonSquare .squareFront {
+  background: rgba(107, 114, 128, 0.15);
+  border: 2px solid #6b7280;
+  box-shadow: 0 0 8px rgba(107, 114, 128, 0.3);
+}
+
+.prisonSquare:hover .squareFront {
+  background: rgba(107, 114, 128, 0.25);
+  box-shadow: 0 0 12px rgba(107, 114, 128, 0.5);
+}
+
+/* Case mort - Design plat moderne noir/rouge néon */
+.mortSquare .squareFront {
+  background: rgba(17, 24, 39, 0.8);
+  border: 2px solid #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+}
+
+.mortSquare:hover .squareFront {
+  background: rgba(17, 24, 39, 0.9);
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.6);
+}
+
+/* Cases rouges avec design plat simplifié */
+.redDarkSquare .squareFront {
+  background: rgba(127, 29, 29, 0.2);
+  border: 2px solid #7f1d1d;
+  box-shadow: 0 0 6px rgba(127, 29, 29, 0.3);
+}
+
+.redMidSquare .squareFront {
+  background: rgba(185, 28, 28, 0.2);
+  border: 2px solid #b91c1c;
+  box-shadow: 0 0 6px rgba(185, 28, 28, 0.3);
+}
+
+.redLightSquare .squareFront {
+  background: rgba(239, 68, 68, 0.2);
+  border: 2px solid #ef4444;
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.3);
+}
+
+/* === CASE ACTIVE === */
+.hotSquare::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  background: rgba(255, 215, 0, 0.2);
+  border: 2px solid #ffd700;
+  border-radius: 12px;
+  z-index: 5;
+  pointer-events: none;
+  animation: simpleGlow 2s ease-in-out infinite alternate;
+}
+
+/* === PIÈCES DE JEU === */
+.gamePiece {
+  width: clamp(20px, 4.5vw, 36px);
+  height: clamp(40px, 9vw, 70px);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: calc(clamp(20px, 4.5vw, 36px) / -2);
+  margin-top: calc(clamp(40px, 9vw, 70px) / -1.2);
+  z-index: 40;
+  pointer-events: none;
+  transform-style: preserve-3d;
+}
+
+.localTower {
+  --tower-color-primary: #FFD700;
+  --tower-color-secondary: #FFA500;
+  --tower-color-accent: #FFFFFF;
+}
+
+.remoteTower {
+  --tower-color-primary: #3B82F6;
+  --tower-color-secondary: #1D4ED8;
+  --tower-color-accent: #DBEAFE;
+}
+
+.towerBase {
+  position: absolute;
+  width: 130%;
+  height: 30%;
+  bottom: 0;
+  left: -15%;
+  border-radius: 25% 25% 60% 60%;
+  background: linear-gradient(145deg, 
+    var(--tower-color-primary) 0%,
+    var(--tower-color-secondary) 60%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+  box-shadow: 
+    0 6px 15px rgba(0, 0, 0, 0.6),
+    inset 0 3px 8px rgba(255, 255, 255, 0.4),
+    inset 0 -3px 8px rgba(0, 0, 0, 0.3);
+  transform: translateZ(8px);
+}
+
+.towerBody {
+  position: absolute;
+  width: 100%;
+  height: 65%;
+  bottom: 15%;
+  left: 0;
+  background: linear-gradient(180deg,
+    var(--tower-color-accent) 0%,
+    var(--tower-color-primary) 20%,
+    var(--tower-color-secondary) 80%,
+    rgba(0, 0, 0, 0.2) 100%
+  );
+  border-radius: 10% 10% 20% 20%;
+  box-shadow: 
+    inset 3px 0 8px rgba(255, 255, 255, 0.5),
+    inset -3px 0 8px rgba(0, 0, 0, 0.3),
+    0 8px 20px rgba(0, 0, 0, 0.5);
+  transform: translateZ(12px);
+  position: relative;
+}
+
+.towerTop {
+  position: absolute;
+  width: 75%;
+  height: 25%;
+  top: 0;
+  left: 12.5%;
+  border-radius: 60% 60% 30% 30%;
+  background: linear-gradient(145deg,
+    var(--tower-color-accent) 0%,
+    var(--tower-color-primary) 40%,
+    var(--tower-color-secondary) 100%
+  );
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    inset 0 2px 6px rgba(255, 255, 255, 0.6),
+    inset 0 -2px 6px rgba(0, 0, 0, 0.2);
+  transform: translateZ(16px);
+}
+
+.towerRing {
+  position: absolute;
+  width: 110%;
+  height: 4px;
+  left: -5%;
+  background: linear-gradient(90deg,
+    rgba(0, 0, 0, 0.4) 0%,
+    var(--tower-color-accent) 20%,
+    #FFD700 50%,
+    var(--tower-color-accent) 80%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+  border-radius: 50%;
+  transform: translateZ(15px);
+  box-shadow: 
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    inset 0 1px 2px rgba(255, 255, 255, 0.6);
+}
+
+.towerRing:nth-child(1) { bottom: 40%; }
+.towerRing:nth-child(2) { bottom: 60%; }
+
+.pieceShadow {
+  position: absolute;
+  width: 400%;
+  height: 50px;
+  bottom: -45px;
+  left: -150%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, 
+    rgba(0, 0, 0, 0.7) 0%, 
+    rgba(0, 0, 0, 0.4) 40%, 
+    rgba(0, 0, 0, 0.1) 70%, 
+    transparent 90%
+  );
+  filter: blur(15px);
+  transform: rotateX(90deg) scale(0.8, 1.5);
+  opacity: 0.6;
+}
+
+/* === DÉ === */
+.diceContainer {
+  transform-style: preserve-3d;
+  margin-bottom: 60px;
+  z-index: 20;
+  position: relative;
+}
+
+.diceButton {
+  background: linear-gradient(145deg, 
+    rgba(255, 215, 0, 0.95) 0%,
+    rgba(255, 193, 7, 0.9) 50%,
+    rgba(255, 152, 0, 0.85) 100%
+  );
+  border: none;
+  border-radius: 16px;
+  padding: 16px 32px;
+  font-size: 1.4rem;
+  font-weight: bold;
+  color: #1a1a1a;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 8px 25px rgba(255, 215, 0, 0.4),
+    0 2px 10px rgba(0, 0, 0, 0.3),
+    inset 0 2px 5px rgba(255, 255, 255, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.diceButton:hover {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 12px 35px rgba(255, 215, 0, 0.5),
+    0 4px 15px rgba(0, 0, 0, 0.4),
+    inset 0 2px 5px rgba(255, 255, 255, 0.4);
+}
+
+.diceButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: scale(1);
+}
+
+.diceFace {
+  position: relative;
+  z-index: 2;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* === CONTRÔLES === */
+.controlsBar {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(145deg, 
+    rgba(26, 26, 46, 0.95) 0%,
+    rgba(52, 52, 90, 0.9) 50%,
+    rgba(74, 74, 128, 0.85) 100%
+  );
+  border: 2px solid rgba(255, 215, 0, 0.3);
+  border-radius: 16px;
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 2px 10px rgba(255, 215, 0, 0.2),
+    inset 0 2px 5px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+}
+
+.gameTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #FFD700;
+  text-shadow: 
+    0 0 10px rgba(255, 215, 0, 0.8),
+    0 2px 4px rgba(0, 0, 0, 0.5);
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.turnStatus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0.5rem;
+}
+
+.turnIndicator {
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.myTurn {
+  background: linear-gradient(145deg, 
+    rgba(34, 197, 94, 0.2) 0%,
+    rgba(22, 163, 74, 0.3) 100%
+  );
+  color: #22c55e;
+  border-color: rgba(34, 197, 94, 0.4);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  animation: pulseGreen 2s ease-in-out infinite;
+}
+
+.waitingTurn {
+  background: linear-gradient(145deg, 
+    rgba(156, 163, 175, 0.2) 0%,
+    rgba(107, 114, 128, 0.3) 100%
+  );
+  color: #9ca3af;
+  border-color: rgba(156, 163, 175, 0.4);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.controlButton {
+  padding: 0.5rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  background: linear-gradient(145deg, 
+    rgba(107, 114, 142, 0.9) 0%,
+    rgba(75, 85, 99, 0.85) 50%,
+    rgba(55, 65, 81, 0.8) 100%
+  );
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 
+    0 4px 15px rgba(0, 0, 0, 0.3),
+    inset 0 1px 3px rgba(255, 255, 255, 0.2);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.controlButton:hover {
+  transform: translateY(-2px) scale(1.05);
+  background: linear-gradient(145deg, 
+    rgba(59, 130, 246, 0.9) 0%,
+    rgba(37, 99, 235, 0.85) 50%,
+    rgba(29, 78, 216, 0.8) 100%
+  );
+  box-shadow: 
+    0 8px 25px rgba(59, 130, 246, 0.4),
+    0 3px 10px rgba(0, 0, 0, 0.4),
+    inset 0 1px 3px rgba(255, 255, 255, 0.3);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.controlButton:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.rollButton {
+  padding: 0.6rem 1.2rem;
+  font-size: 1rem;
+  font-weight: bold;
+  background: linear-gradient(145deg, 
+    rgba(255, 215, 0, 0.95) 0%,
+    rgba(255, 193, 7, 0.9) 50%,
+    rgba(255, 152, 0, 0.85) 100%
+  );
+  color: #1a1a1a;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  box-shadow: 
+    0 8px 25px rgba(255, 215, 0, 0.4),
+    0 2px 10px rgba(0, 0, 0, 0.3),
+    inset 0 2px 5px rgba(255, 255, 255, 0.3);
+  transition: all 0.3s ease;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.rollButton:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 
+    0 15px 35px rgba(255, 215, 0, 0.5),
+    0 5px 15px rgba(0, 0, 0, 0.4),
+    inset 0 2px 5px rgba(255, 255, 255, 0.4);
+}
+
+.rollButton:active {
+  transform: translateY(1px) scale(0.98);
+}
+
+.rollButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: scale(1);
+}
+
+/* Canvas container */
+.canvasContainer {
+  width: 100%;
+  height: 100%;
+}
+
+/* === FEEDBACK OVERLAY === */
+.feedbackOverlay {
+  position: absolute;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  padding: 1rem 2rem;
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  box-shadow: 
+    0 8px 25px rgba(0, 0, 0, 0.4),
+    0 2px 10px rgba(0, 0, 0, 0.2),
+    inset 0 2px 5px rgba(255, 255, 255, 0.1);
+  transition: all 0.5s ease;
+  animation: feedbackSlideIn 0.5s ease-out;
+  max-width: 400px;
+  text-align: center;
+}
+
+.feedbackOverlay.success {
+  background: linear-gradient(145deg, 
+    rgba(34, 197, 94, 0.9) 0%,
+    rgba(22, 163, 74, 0.85) 50%,
+    rgba(16, 185, 129, 0.8) 100%
+  );
+  border: 2px solid rgba(34, 197, 94, 0.6);
+  color: #ffffff;
+}
+
+.feedbackOverlay.error {
+  background: linear-gradient(145deg, 
+    rgba(239, 68, 68, 0.9) 0%,
+    rgba(220, 38, 38, 0.85) 50%,
+    rgba(185, 28, 28, 0.8) 100%
+  );
+  border: 2px solid rgba(239, 68, 68, 0.6);
+  color: #ffffff;
+}
+
+.feedbackOverlay.info {
+  background: linear-gradient(145deg, 
+    rgba(59, 130, 246, 0.9) 0%,
+    rgba(37, 99, 235, 0.85) 50%,
+    rgba(29, 78, 216, 0.8) 100%
+  );
+  border: 2px solid rgba(59, 130, 246, 0.6);
+  color: #ffffff;
+}
+
+.feedbackMessage {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.feedbackIcon {
+  font-size: 1.5rem;
+  margin-right: 0.5rem;
+  display: inline-block;
+}
+
+.feedbackOverlay.fadeOut {
+  animation: feedbackSlideOut 0.5s ease-in forwards;
+}
+
+/* === ICÔNES ET TEXTES === */
+.specialIcon {
+  font-size: 1.2em;
+  margin-left: 0.3em;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 768px) {
+  .boardContainer {
+    perspective: 1200px;
+    padding: 20px 10px 80px;
+    min-height: 100vh;
+  }
+  
+  .spiralBoard {
+    width: clamp(300px, 95vw, 600px);
+    height: clamp(300px, 95vw, 600px);
+    gap: clamp(3px, 0.8vw, 10px);
+    padding: clamp(6px, 1.2vw, 16px);
+  }
+  
+  .boardSquare {
+    border-radius: 8px;
+  }
+  
+  .squareFront {
+    font-size: clamp(0.6rem, 3vw, 1rem);
+    border-radius: 8px;
+  }
+  
+  .specialIcon {
+    font-size: 1.1em;
+  }
+  
+  .gamePiece {
+    width: clamp(16px, 5vw, 28px);
+    height: clamp(32px, 10vw, 55px);
+    margin-left: calc(clamp(16px, 5vw, 28px) / -2);
+    margin-top: calc(clamp(32px, 10vw, 55px) / -1.2);
+  }
+  
+  .diceButton {
+    padding: 12px 24px;
+    font-size: 1.1rem;
+    border-radius: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .boardContainer {
+    perspective: 800px;
+    padding: 15px 5px 60px;
+  }
+  
+  .spiralBoard {
+    width: 96vw;
+    height: 96vw;
+    gap: 2px;
+    padding: 4px;
+    border-radius: 12px;
+  }
+  
+  .boardSquare {
+    border-radius: 6px;
+  }
+  
+  .squareFront {
+    font-size: clamp(0.5rem, 4vw, 0.9rem);
+    border-radius: 6px;
+    border-width: 1px;
+  }
+  
+  .specialIcon {
+    font-size: 1em;
+    margin-left: 0.2em;
+  }
+  
+  .gamePiece {
+    width: clamp(14px, 6vw, 24px);
+    height: clamp(28px, 12vw, 48px);
+    margin-left: calc(clamp(14px, 6vw, 24px) / -2);
+    margin-top: calc(clamp(28px, 12vw, 48px) / -1.2);
+  }
+  
+  .diceButton {
+    padding: 10px 20px;
+    font-size: 1rem;
+    border-radius: 10px;
+  }
+  
+  .diceContainer {
+    margin-bottom: 40px;
+  }
+}
+
+/* === OPTIMISATIONS PERFORMANCE === */
+@media (prefers-reduced-motion: reduce) {
+  .boardGrid,
+  .gamePiece,
+  .diceButton,
+  .pieceShadow {
+    animation: none !important;
+  }
+  
+  .boardSquare {
+    transition: none !important;
+  }
+}
+
+/* === MODE SOMBRE === */
+@media (prefers-color-scheme: dark) {
+  .boardContainer {
+    background: radial-gradient(ellipse at center, 
+      rgba(5, 10, 20, 0.98) 0%,
+      rgba(10, 15, 25, 0.99) 50%,
+      rgba(0, 0, 0, 1) 100%
+    );
+  }
+  
+  .squareFront {
+    text-shadow: 
+      0 3px 10px rgba(0, 0, 0, 1),
+      0 0 6px rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* === CONTRASTE ÉLEVÉ === */
+@media (prefers-contrast: high) {
+  .squareFront {
+    border-width: 3px;
+    font-weight: 900;
+  }
+  
+  .oieSquare, .pontSquare, .hotelSquare, .puitsSquare, 
+  .labyrintheSquare, .prisonSquare, .mortSquare,
+  .redDarkSquare, .redMidSquare, .redLightSquare {
+    border-width: 3px;
+  }
+}

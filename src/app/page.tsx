@@ -92,6 +92,7 @@ export default function Home() {
               connectedPlayers={connectedPlayers}
               feedback={feedback}
               position={position}
+              showChat={isMulti}
             />
           ) : (
             <Board 
@@ -113,6 +114,7 @@ export default function Home() {
               connectedPlayers={connectedPlayers}
               feedback={feedback}
               position={position}
+              showChat={isMulti}
             />
           )}
         </div>

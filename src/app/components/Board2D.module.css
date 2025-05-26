@@ -1,0 +1,572 @@
+/* === STYLES SIMPLIFIÉS POUR MODE 2D === */
+
+/* Animation simple pour case active */
+@keyframes subtleGlow {
+  0% { opacity: 0.8; }
+  100% { opacity: 1; }
+}
+
+@keyframes fadeIn {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+/* === CONTENEUR PRINCIPAL === */
+.boardContainer {
+  padding: 20px;
+  overflow: visible;
+  background: transparent !important;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  transition: all 0.3s ease;
+}
+
+/* Variante si le chat est affiché (ex: .withChat sur le container) */
+.boardContainer.withChat {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  background: transparent;
+  min-height: 100vh;
+  transition: none;
+}
+
+.board2DWrapper {
+  flex: 1 1 0%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 100vh;
+  padding: 20px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.chatPanel {
+  width: 360px;
+  min-width: 320px;
+  max-width: 400px;
+  height: 100vh;
+  background: #181e2a;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #222b3a;
+  box-shadow: -2px 0 8px rgba(0,0,0,0.08);
+  z-index: 20;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* === GRILLE SPIRALE === */
+.spiralBoard {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  grid-template-rows: repeat(8, minmax(0, 1fr));
+  gap: 18px;
+  width: 100%;
+  height: min(95vw, 90vh, 900px);
+  max-width: min(95vw, 900px);
+  max-height: 90vh;
+  position: relative;
+  
+  border: 2px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 32px;
+  
+  background: white;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.13);
+  transition: all 0.3s ease;
+}
+
+/* Styles quand le chat est visible ET le container withChat */
+.boardContainer.withChat .spiralBoard {
+  max-width: min(calc(100vw - 400px), 800px);
+  max-height: 85vh;
+  height: min(calc(100vh - 120px), 85vh, 800px);
+  gap: 12px;
+  padding: 20px;
+}
+
+/* Optimisation pour écrans très larges avec chat */
+@media (min-width: 1400px) {
+  .boardContainer.withChat .spiralBoard {
+    max-width: min(calc(100vw - 420px), 950px);
+    max-height: 90vh;
+    height: min(calc(100vh - 100px), 90vh, 950px);
+    gap: 16px;
+    padding: 28px;
+  }
+  
+  .boardContainer.withChat .boardSquare {
+    min-width: 50px;
+    min-height: 50px;
+    font-size: 1.2rem;
+  }
+  
+  .boardContainer.withChat .squareFront {
+    font-size: clamp(1rem, 1.8vw, 1.2rem);
+  }
+}
+
+/* Optimisation pour écrans larges quand le chat n'est PAS visible */
+@media (min-width: 1024px) {
+  .boardContainer:not(.withChat) .spiralBoard {
+    max-width: min(95vw, 1100px);
+    max-height: min(95vh, 1100px);
+    height: min(95vw, 95vh, 1100px);
+    gap: 20px;
+    padding: 40px;
+  }
+  
+  .boardContainer:not(.withChat) .boardSquare {
+    min-width: 70px;
+    min-height: 70px;
+    font-size: 1.6rem;
+  }
+  
+  .boardContainer:not(.withChat) .squareFront {
+    font-size: clamp(1.2rem, 2.8vw, 1.6rem);
+  }
+}
+
+/* === CASES DU PLATEAU === */
+.boardSquare {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  position: relative;
+  cursor: pointer;
+  min-width: 60px;
+  min-height: 60px;
+  font-size: 1.4rem;
+  aspect-ratio: 1;
+}
+
+.boardContainer.withChat .boardSquare {
+  min-width: 40px;
+  min-height: 40px;
+  font-size: 1rem;
+}
+
+.boardSquare:hover {
+  transform: scale(1.02);
+  border-color: #64748b;
+}
+
+.squareFront {
+  font-size: clamp(1rem, 2.5vw, 1.4rem);
+  font-weight: 600;
+  color: #334155;
+  background: none;
+  border: none;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  position: relative;
+}
+
+.boardContainer.withChat .squareFront {
+  font-size: clamp(0.8rem, 1.5vw, 1rem);
+  border-radius: 6px;
+}
+
+/* === CASES SPÉCIALES AVEC DESIGN SIMPLE === */
+
+/* Case oie - Couleur verte simple */
+.oieSquare {
+  background: #dcfce7;
+  border-color: #22c55e;
+}
+
+.oieSquare .squareFront {
+  color: #15803d;
+}
+
+/* Case pont - Couleur bleue simple */
+.pontSquare {
+  background: #dbeafe;
+  border-color: #3b82f6;
+}
+
+.pontSquare .squareFront {
+  color: #1d4ed8;
+}
+
+/* Case hôtel - Couleur violette simple */
+.hotelSquare {
+  background: #f3e8ff;
+  border-color: #9333ea;
+}
+
+.hotelSquare .squareFront {
+  color: #7c3aed;
+}
+
+/* Case puits - Couleur indigo simple */
+.puitsSquare {
+  background: #e0e7ff;
+  border-color: #6366f1;
+}
+
+.puitsSquare .squareFront {
+  color: #4f46e5;
+}
+
+/* Case labyrinthe - Couleur orange simple */
+.labyrintheSquare {
+  background: #fed7aa;
+  border-color: #f97316;
+}
+
+.labyrintheSquare .squareFront {
+  color: #ea580c;
+}
+
+/* Case prison - Couleur grise simple */
+.prisonSquare {
+  background: #f1f5f9;
+  border-color: #6b7280;
+}
+
+.prisonSquare .squareFront {
+  color: #4b5563;
+}
+
+/* Case mort - Couleur rouge/noire simple */
+.mortSquare {
+  background: #fef2f2;
+  border-color: #ef4444;
+}
+
+.mortSquare .squareFront {
+  color: #dc2626;
+}
+
+/* === CASE ACTIVE === */
+.hotSquare {
+  border-color: #fbbf24 !important;
+  background: #fef3c7 !important;
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+  animation: subtleGlow 2s ease-in-out infinite alternate;
+}
+
+/* === PIÈCES DE JEU SIMPLIFIÉES === */
+.gamePiece {
+  width: clamp(22px, 5vw, 36px);
+  height: clamp(22px, 5vw, 36px);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-left: calc(clamp(22px, 5vw, 36px) / -2);
+  margin-top: calc(clamp(22px, 5vw, 36px) / -2);
+  z-index: 10;
+  pointer-events: none;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: clamp(12px, 3vw, 18px);
+  color: white;
+}
+
+/* Pièces plus grandes sur grands écrans sans chat */
+@media (min-width: 1024px) {
+  .boardContainer:not(.withChat) .gamePiece {
+    width: clamp(28px, 4vw, 44px);
+    height: clamp(28px, 4vw, 44px);
+    margin-left: calc(clamp(28px, 4vw, 44px) / -2);
+    margin-top: calc(clamp(28px, 4vw, 44px) / -2);
+    font-size: clamp(14px, 2.5vw, 22px);
+  }
+}
+
+.gamePiece {
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.boardContainer.withChat .gamePiece {
+  width: clamp(16px, 3vw, 24px);
+  height: clamp(16px, 3vw, 24px);
+  margin-left: calc(clamp(16px, 3vw, 24px) / -2);
+  margin-top: calc(clamp(16px, 3vw, 24px) / -2);
+  font-size: clamp(9px, 2vw, 12px);
+}
+
+/* Pièces plus grandes sur grands écrans même avec chat */
+@media (min-width: 1400px) {
+  .boardContainer.withChat .gamePiece {
+    width: clamp(20px, 2.5vw, 28px);
+    height: clamp(20px, 2.5vw, 28px);
+    margin-left: calc(clamp(20px, 2.5vw, 28px) / -2);
+    margin-top: calc(clamp(20px, 2.5vw, 28px) / -2);
+    font-size: clamp(11px, 1.8vw, 16px);
+  }
+}
+
+.localTower {
+  background: #fbbf24;
+  border-color: #f59e0b;
+}
+
+.remoteTower {
+  background: #3b82f6;
+  border-color: #2563eb;
+}
+
+/* === CONTRÔLES SIMPLIFIÉS === */
+.controlsBar {
+  position: absolute;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: white;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.boardContainer.withChat .controlsBar {
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+}
+
+.boardContainer.withChat .gameTitle {
+  font-size: 1.2rem;
+}
+
+.gameTitle {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #1e293b;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.buttonGroup {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.turnStatus {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 0.5rem;
+}
+
+.turnIndicator {
+  padding: 0.3rem 0.8rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.myTurn {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #22c55e;
+}
+
+.waitingTurn {
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fbbf24;
+}
+
+.controlButton, .rollButton {
+  padding: 0.5rem 1rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: white;
+  color: #334155;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.controlButton:hover, .rollButton:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.rollButton {
+  background: #3b82f6;
+  color: white;
+  border-color: #3b82f6;
+}
+
+.rollButton:hover {
+  background: #2563eb;
+  border-color: #2563eb;
+}
+
+.rollButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* === ICÔNES SPÉCIALES === */
+.specialIcon {
+  margin-left: 4px;
+  font-size: 0.8em;
+}
+
+/* Icônes plus grandes sur grands écrans sans chat */
+@media (min-width: 1024px) {
+  .boardContainer:not(.withChat) .specialIcon {
+    font-size: 1.2em;
+    margin-left: 6px;
+  }
+}
+
+/* === FEEDBACK === */
+.feedbackOverlay {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1000;
+  padding: 1rem 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: fadeIn 0.3s ease;
+}
+
+.feedbackMessage {
+  margin: 0;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.feedbackIcon {
+  font-size: 1.2em;
+}
+
+.success {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #22c55e;
+}
+
+.error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #ef4444;
+}
+
+.info {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border: 1px solid #3b82f6;
+}
+
+@media (max-width: 1023px) and (min-width: 901px) {
+  /* Écrans moyens - optimisation quand pas de chat */
+  .boardContainer:not(.withChat) .spiralBoard {
+    max-width: min(90vw, 850px);
+    max-height: min(90vh, 850px);
+    height: min(90vw, 90vh, 850px);
+    gap: 16px;
+    padding: 28px;
+  }
+  
+  .boardContainer:not(.withChat) .boardSquare {
+    min-width: 65px;
+    min-height: 65px;
+    font-size: 1.5rem;
+  }
+  
+  /* Écrans moyens - optimisation quand chat présent */
+  .boardContainer.withChat .spiralBoard {
+    max-width: min(calc(100vw - 380px), 600px);
+    max-height: 80vh;
+    height: min(calc(100vh - 140px), 80vh, 600px);
+    gap: 10px;
+    padding: 16px;
+  }
+}
+
+@media (max-width: 900px) {
+  .spiralBoard {
+    gap: 12px;
+    padding: 16px;
+    max-width: 95%;
+  }
+  .boardContainer.withChat {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .chatPanel {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+    height: 320px;
+    min-height: 200px;
+    border-left: none;
+    border-top: 1px solid #222b3a;
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.08);
+    position: static;
+    order: 2;
+  }
+  .board2DWrapper {
+    min-height: 0;
+    padding: 8px;
+    order: 1;
+  }
+}
+
+@media (max-width: 600px) {
+  .spiralBoard {
+    gap: 8px;
+    padding: 12px;
+  }
+  .boardContainer.withChat .spiralBoard {
+    gap: 4px;
+    padding: 6px;
+  }
+  .boardSquare {
+    min-width: 36px;
+    min-height: 36px;
+    font-size: 1rem;
+  }
+  .boardContainer.withChat .boardSquare {
+    min-width: 28px;
+    min-height: 28px;
+    font-size: 0.8rem;
+  }
+}
