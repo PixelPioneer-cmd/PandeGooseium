@@ -130,3 +130,4 @@ Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de
 - Communauté Next.js pour les outils exceptionnels
 - React Three Fiber pour la simplicité du 3D
 - Socket.IO pour le temps réel robuste
+- Aux enseignants du Lycée Monte Cristo pour leur soutien
