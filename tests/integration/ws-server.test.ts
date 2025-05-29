@@ -16,11 +16,12 @@ interface GameStateMessage {
 }
 
 describe('WebSocket Server (Socket.IO)', () => {
-  // Augmenter le timeout pour tous les tests dans ce fichier
-  jest.setTimeout(30000);
-  
   let ioServer: SocketIOServer;
   const PORT = 5005; // Utiliser un port différent pour éviter les conflits
+
+  beforeEach(() => {
+    // Tests prêts pour exécution
+  });
 
   beforeAll(async () => {
     // Créer une nouvelle instance de serveur pour les tests
@@ -98,33 +99,53 @@ describe('WebSocket Server (Socket.IO)', () => {
     const clientA = io(`http://localhost:${PORT}`, { transports: ['websocket'] });
     const clientB = io(`http://localhost:${PORT}`, { transports: ['websocket'] });
     let joinCompleted = false;
+    let clientsConnected = 0;
+    let timeoutId: NodeJS.Timeout | null = null;
+    
+    const cleanup = () => {
+      if (timeoutId) clearTimeout(timeoutId);
+      if (clientA.connected) clientA.disconnect();
+      if (clientB.connected) clientB.disconnect();
+    };
     
     // Connecter les deux clients et les faire rejoindre la partie
     clientA.on('connect', () => {
+      clientsConnected++;
       clientA.emit('join', { type: 'join', name: 'David' });
     });
     
     clientB.on('connect', () => {
+      clientsConnected++;
       clientB.emit('join', { type: 'join', name: 'Emma' });
     });
     
     // Vérifier l'état du jeu et envoyer un mouvement
     clientA.on('game_state', () => {
-      if (!joinCompleted) {
+      if (!joinCompleted && clientsConnected >= 2) {
         joinCompleted = true;
-        // Envoyer un mouvement depuis le client A
-        clientA.emit('move', { type: 'move', position: 5 });
+        // Attendre un peu pour s'assurer que tous les clients sont prêts
+        setTimeout(() => {
+          clientA.emit('move', { type: 'move', position: 5 });
+        }, 100);
       }
     });
     
     // Le client B devrait recevoir le mouvement
     clientB.on('move', (payload: { position: number; playerId: string }) => {
-      expect(payload.position).toEqual(5);
-      
-      // Nettoyer et terminer
-      clientA.disconnect();
-      clientB.disconnect();
-      done();
+      try {
+        expect(payload.position).toEqual(5);
+        cleanup();
+        done();
+      } catch (error) {
+        cleanup();
+        done(error);
+      }
     });
-  });
+    
+    // Timeout de sécurité
+    timeoutId = setTimeout(() => {
+      cleanup();
+      done(new Error('Test timeout'));
+    }, 4000);
+  }, 5000);
 });

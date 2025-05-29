@@ -1,75 +1,132 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# PandeGooseium 🦢🎲
 
-## Getting Started
+Un jeu de l'oie multijoueur en temps réel sur le thème de la mythologie grecque et des Enfers, développé avec Next.js, Three.js et Socket.IO.
 
-First, run the development server:
+## 🎮 Caractéristiques
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+- **Jeu de l'oie classique** avec 63 cases thématiques
+- **Multijoueur temps réel** via WebSocket
+- **Plateau en 3D** interactif avec Three.js/React Three Fiber
+- **Questions mythologiques** sur les Enfers grecs (Hadès, Perséphone, Cerbère...)
+- **Chat en temps réel** entre joueurs
+- **Interface moderne** avec animations et effets visuels
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## 🛠️ Technologies
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+- **Frontend**: Next.js 15, React 19, TypeScript
+- **3D/Animations**: Three.js, React Three Fiber, @react-three/drei
+- **Styling**: Tailwind CSS 4
+- **WebSocket**: Socket.IO
+- **Tests**: Jest, Testing Library
+- **Déploiement**: Render
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🚀 Installation
 
-## Configuration des variables d'environnement
+1. **Clonez le repository**
+   ```bash
+   git clone https://github.com/votre-username/pandegooseium.git
+   cd pandegooseium
+   ```
 
-Copiez le fichier d'exemple et ajustez les variables selon votre environnement :
+2. **Installez les dépendances**
+   ```bash
+   npm install
+   ```
 
-```bash
-cp .env.example .env.local
-# puis ouvrez .env.local pour modifier NEXT_PUBLIC_WS_SERVER si nécessaire
-```
+3. **Configurez l'environnement** (optionnel)
+   ```bash
+   cp .env.example .env.local
+   # Ajustez NEXT_PUBLIC_WS_SERVER si nécessaire
+   ```
 
-## Lancement du projet en développement
+## 🎯 Développement
 
-Installez les dépendances :
-
-```bash
-npm install
-```
-
-Démarrez simultanément le serveur Next.js et le serveur WebSocket :
-
+**Démarrage rapide** (Next.js + WebSocket) :
 ```bash
 npm run dev:all
 ```
 
-Si vous préférez lancer séparément :
-
+**Démarrage séparé** :
 ```bash
-npm run dev    # Next.js
-npm run ws     # WebSocket
+npm run dev     # Next.js sur http://localhost:3000
+npm run dev:ws  # WebSocket sur port 3001
 ```
 
-## Lancement en production
+## 📦 Production
 
-Dans un environnement de production (ou sur Vercel), définissez la variable `NEXT_PUBLIC_WS_SERVER` dans vos settings et lancez :
-
+**Build et démarrage** :
 ```bash
 npm run build
-npm run start
+npm start       # Serveur intégré Next.js + Socket.IO
 ```
 
-## Learn More
+## 🧪 Tests
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm test                    # Tous les tests
+npm run test:watch         # Mode watch
+npm run test:coverage      # Avec couverture
+npm run test:category api  # Tests par catégorie
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🎲 Comment Jouer
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Ouvrez le jeu dans votre navigateur
+2. Entrez votre nom de joueur
+3. Lancez le dé pour avancer sur le plateau
+4. Répondez aux questions mythologiques
+5. Chatez avec les autres joueurs
+6. Premier arrivé à la case 63 gagne !
 
-## Deploy on Vercel
+## 📁 Structure du Projet
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+├── src/
+│   ├── app/                 # Pages et API routes Next.js
+│   ├── components/          # Composants React (plateau, chat, etc.)
+│   ├── hooks/              # Hooks personnalisés (WebSocket, logique)
+│   ├── types/              # Types TypeScript
+│   └── utils/              # Utilitaires (questions, algorithmes)
+├── data/
+│   └── questions.json      # 63 questions sur les Enfers grecs
+├── tests/                  # Tests organisés par catégorie
+├── docs/                   # Documentation technique
+└── server.js              # Serveur Express intégré
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 🌟 Fonctionnalités Techniques
+
+- **Rendu hybride**: Composants serveur et client optimisés
+- **WebSocket robuste**: Reconnexion automatique et gestion d'erreurs
+- **Performance 3D**: Optimisations Three.js pour fluidité
+- **Tests complets**: API, composants, hooks et intégration
+- **Déploiement simple**: Serveur intégré pour production
+
+## 📚 Documentation
+
+La documentation technique se trouve dans le dossier [`docs/`](./docs/) :
+
+- [Guide de déploiement](./docs/DEPLOYMENT_GUIDE.md)
+- [Guide des tests](./docs/TESTING_VERIFICATION_GUIDE.md)
+- [Organisation des tests](./docs/TESTS_ORGANIZATION_SUMMARY.md)
+- [Résumé du refactoring](./docs/REFACTORING_SUMMARY.md)
+- [Fix Render](./docs/RENDER_FIX_GUIDE.md)
+
+## 🤝 Contribution
+
+1. Forkez le projet
+2. Créez votre branche (`git checkout -b feature/amazing-feature`)
+3. Committez vos changements (`git commit -m 'Add amazing feature'`)
+4. Poussez vers la branche (`git push origin feature/amazing-feature`)
+5. Ouvrez une Pull Request
+
+## 📄 Licence
+
+Ce projet est sous licence MIT - voir le fichier [LICENSE](LICENSE) pour plus de détails.
+
+## 🙏 Remerciements
+
+- Mythologie grecque pour l'inspiration thématique
+- Communauté Next.js pour les outils exceptionnels
+- React Three Fiber pour la simplicité du 3D
+- Socket.IO pour le temps réel robuste

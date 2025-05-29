@@ -1,4 +1,4 @@
-import { GET as rollGET } from './route';
+import { GET as rollGET } from '../../src/app/api/roll/route';
 // Node.js 18+ global Request exists
 
 describe('API /api/roll', () => {

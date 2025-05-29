@@ -1,4 +1,4 @@
-import { getQuestion, validateAnswer } from './questions';
+import { getQuestion, validateAnswer } from '../../src/utils/questions';
 
 describe('questions utils', () => {
   test('getQuestion returns correct data for existing case', () => {
