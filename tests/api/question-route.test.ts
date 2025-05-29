@@ -1,4 +1,4 @@
-import { GET, POST } from './route';
+import { GET, POST } from '../../src/app/api/question/[case]/route';
 
 describe('API /api/question/[case]', () => {
   test('GET retourne question et niveau pour case existante', async () => {
